@@ -1,25 +1,45 @@
-import React from 'react';
-import logo from './logo.svg';
+import React,{ useState, useEffect } from 'react';
+import { BrowserRouter as Router, Switch, Route, Link } from 'react-router-dom';
 import './App.css';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import { Home, PrivateRoute, Login, Register, Profile } from './components/Components';
+import { AuthContext } from './context/auth';
 
-function App() {
+const App = () => {
+  const [token, setToken] = useState(undefined);
+
+  useEffect(() => {
+    let storedToken = localStorage.getItem('token');
+    if (storedToken) {
+      setToken(storedToken);
+    }
+  }, []);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <AuthContext.Provider value={{
+      token: token,
+      signIn: (token) => {
+        localStorage.setItem('token', token);
+        setToken(token);
+      },
+      signOut: () => {
+        localStorage.removeItem('token');
+        setToken(undefined);
+      }
+    }}>
+      <div className="App" style={{ fontFamily: 'Sansita' }}>
+        <Router>
+          <Switch>
+            <Route exact path='/' component={Home}/>
+            <Route path='/login' component={Login}/>
+            <Route path='/register' component={Register}/>
+            <PrivateRoute path='/profile' component={Profile}/>
+            {/* <Route path='/services' component={Services}/>
+            <Route path='/profile' component={Profile}/> */}
+          </Switch>
+        </Router>
+      </div>
+    </AuthContext.Provider>
   );
 }
 
