@@ -6,7 +6,6 @@ import car2 from '../images/car2.jpg';
 import car3 from '../images/car3.jpg';
 
 export const Home = () => {
-  const { token } = useAuth();
 
   return (<>
     <Navbar style={{ background: '#d9f8ff' }}>
@@ -17,7 +16,7 @@ export const Home = () => {
           <Nav.Link href='/'>Home</Nav.Link>
           <Nav.Link href="#link">Services</Nav.Link>
           {
-            token !== undefined ?
+            localStorage.getItem('token') !== null ?
             <Nav.Link href='/profile'>Profile</Nav.Link> :
             <Nav.Link href="/login">SignIn</Nav.Link>
           }

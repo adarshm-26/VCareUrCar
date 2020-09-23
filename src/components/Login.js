@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import { Card, Form, Button } from 'react-bootstrap';
-import { Link } from 'react-router-dom';
+import { Link, Redirect, useHistory } from 'react-router-dom';
 import { useAuth } from '../context/auth';
 
 
-export const Login = () => {
+export const Login = (props) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const { signIn } = useAuth();
+  const history = useHistory();
 
   return (<>
     <Card style={{ width: '35%', maxWidth: '350px', margin: 'auto', marginTop: '40px' }}>
@@ -36,6 +37,10 @@ export const Login = () => {
             if (result.token) {
               const token = result.token;
               signIn(token);
+              if (props.location.state.redirectFrom) {
+                console.log('Redirecting to ' + props.location.state.redirectFrom);
+                history.push(props.location.state.redirectFrom);
+              }
             }
           } catch (e) {
             console.error(e);

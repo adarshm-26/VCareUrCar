@@ -4,19 +4,19 @@ import { useAuth } from '../context/auth';
 
 export const Profile = () => {
   const [user, setUser] = useState('');
-  const { token, signOut } = useAuth();
+  const { signOut } = useAuth();
 
   useEffect(() => {
-    fetchUserDetails(token)
+    fetchUserDetails(localStorage.getItem('token'))
     .then(userDetails => setUser(userDetails))
     .catch(e => console.error(e));
-  }, [token]);
+  }, []);
 
   return (<>
-    <div style={{ justifyContent: 'center', alignItems: 'center' }}>
+    <div style={{ justifyContent: 'center', alignItems: 'center'}}>
       {
-        user ?
-        <Spinner animation="border" role="status">
+        !user ?
+        <Spinner animation="border" role="status" style={{ margin: '10%' }}>
           <span className="sr-only">Loading...</span>
         </Spinner> :
         <Card>
@@ -24,10 +24,10 @@ export const Profile = () => {
             <p>Name : {user.name}</p>
             <p>Email : {user.email}</p>
             <p>Phone : {user.phone}</p>
-            <Button onClick={signOut}>Sign Out</Button>
           </Card.Body>
         </Card>
       }
+      <Button onClick={signOut}>Sign Out</Button>
     </div>
   </>);
 }

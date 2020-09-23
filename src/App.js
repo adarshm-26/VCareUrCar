@@ -17,7 +17,6 @@ const App = () => {
 
   return (
     <AuthContext.Provider value={{
-      token: token,
       signIn: (token) => {
         localStorage.setItem('token', token);
         setToken(token);
