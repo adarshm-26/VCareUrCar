@@ -1,17 +1,26 @@
 import React, { useState } from 'react';
-import { Card, Form, Button } from 'react-bootstrap';
-import { Link, Redirect, useHistory } from 'react-router-dom';
+import { Card, Form } from 'react-bootstrap';
+import { Header, Alert, Button } from './Components';
+import { Link, useHistory } from 'react-router-dom';
 import { useAuth } from '../context/auth';
 
 
 export const Login = (props) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [onError, setOnError] = useState(undefined);
   const { signIn } = useAuth();
   const history = useHistory();
 
   return (<>
-    <Card style={{ width: '35%', maxWidth: '350px', margin: 'auto', marginTop: '40px' }}>
+    <Header/>
+    <Card style={{ 
+      width: '35%', 
+      maxWidth: '350px', 
+      margin: 'auto', 
+      marginTop: '40px',
+      border: '1px solid #000000'
+    }}>
       <Card.Body>
         <Card.Title>Sign In</Card.Title>
         <Card.Subtitle>using email and password</Card.Subtitle>
@@ -37,39 +46,54 @@ export const Login = (props) => {
             if (result.token) {
               const token = result.token;
               signIn(token);
-              if (props.location.state.redirectFrom) {
+              if (props.location &&
+                props.location.state &&
+                props.location.state.redirectFrom) {
                 console.log('Redirecting to ' + props.location.state.redirectFrom);
                 history.push(props.location.state.redirectFrom);
+              }
+              else {
+                history.push('/profile');
               }
             }
           } catch (e) {
             console.error(e);
+            setOnError(e.message);
           }
         }}>
-          <Form.Label>Email</Form.Label>
           <Form.Control 
+            style={{ marginTop: 20 }} 
             type='text' 
             name='email'
             value={email}
+            placeholder='Email'
             onChange={(val) => 
               setEmail(val.target.value)
             }/>
-          <Form.Label>Password</Form.Label>
-          <Form.Control 
+          <Form.Control
+            style={{ marginTop: 20 }} 
             type='password' 
             name='password'
             value={password}
+            placeholder='Password'
             onChange={(val) => 
               setPassword(val.target.value)
             }/>
           <Button 
-            style={{ marginTop: '10px' }}
+            style={{ marginTop: '20px', marginBottom: '10px' }}
             type='submit'
-          >Sign In
-          </Button>
+            label='Sign In'
+          />
         </Form>
-        <Link to='/register'>Not a member yet ?</Link>
+        <Link 
+          style={{
+            color: '#000000'
+          }}
+          to='/register'>
+            Not a member yet ?
+        </Link>
       </Card.Body>
     </Card>
+    <Alert onError={onError} setOnError={setOnError}/>
   </>);  
 }

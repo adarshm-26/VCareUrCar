@@ -42,34 +42,13 @@
   src: local('Sansita'), url(./fonts/Sansita-Regular.ttf)
 }
 
-.header-button {
+html, body, #root, #root>div {
   background-color: #d9f8ff;
-  border: none;
-  text-align: center;
-  padding-right: 15px;
-  padding-left: 15px;
-  display: inline-block;
-  outline: none;
-  cursor: pointer;
-  font-size: 24px;
-  font-family: 'Sansita';
-  transition-duration: 0.4s;
+  height: 100%
 }
 
-.header-button:hover {
-  text-decoration: underline;
-  text-decoration-color: black;
-}
-
-.header-button:active {
-  text-decoration: none;
-  outline: none;
-}
-
-.header-text {
-  font-family: 'Sansita';
-  padding: 14px 25px;
-  font-size: 36px;
-  font-weight: 500;
-  margin-right: 'auto';
+.nav-link {
+  color: #000000;
+  font-size: 1.2rem;
+  margin-right: 20px;  
 }
