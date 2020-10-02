@@ -5,6 +5,7 @@ import { Link, useHistory } from 'react-router-dom';
 import { useAuth } from '../context/auth';
 
 
+
 export const Login = (props) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -42,9 +43,12 @@ export const Login = (props) => {
               })
             });
             let result = await response.json();
-            console.log(result);
+            
+            console.log(result[1]);
             if (result.token) {
+
               const token = result.token;
+              console.log(token);
               signIn(token);
               if (props.location &&
                 props.location.state &&
@@ -53,6 +57,7 @@ export const Login = (props) => {
                 history.push(props.location.state.redirectFrom);
               }
               else {
+
                 history.push('/profile');
               }
             }

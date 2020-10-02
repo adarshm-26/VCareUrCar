@@ -18,6 +18,7 @@ export const Profile = () => {
     fetchUserDetails()
     .then(user => {
       setUser(user);
+      console.log(user);
     })
     .catch(e => {
       console.error(e);
@@ -127,8 +128,9 @@ const fetchUserJobs = async () => {
     method: 'GET',
     headers: {
       'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json',
-      'cache': 'no-cache'
+      'credentials': 'include',
+      'cache': 'no-cache',
+      
     }
   });
   let jobDetails = await response.json();
