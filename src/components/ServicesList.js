@@ -1,0 +1,20 @@
+export const Services = [
+  { name: 'Change engine oil' },
+  { name: 'Check level and refill brake and clutch fluid' },
+  { name: 'Check brake pads, brake discs and replace' },
+  { name: 'Check coolant hoses' },
+  { name: 'Check charging system and battery' },
+  { name: 'Check level and refill power steering fluid' },
+  { name: 'Check level and refill transmission fluid' },
+  { name: 'Grease and lubricate components' },
+  { name: 'Replace the oil filter' },
+  { name: 'Replace the air filter' },
+  { name: 'Replace the fuel filter' },
+  { name: 'Replace the cabin or a/c filter' },
+  { name: 'Replace spark plug' },
+  { name: 'Inspect and replace the timing belt or timing chain if needed' },
+  { name: 'Check condition of the tires' },
+  { name: 'Check for proper operation of all lights, wipers etc.'},
+  { name: 'Check for any Error codes in the ECU and take corrective action'},
+  { name: 'Complete check for rusting parts' }
+];

@@ -59,13 +59,16 @@ export const Register = () => {
     }
   });
 
-  return (<>
+  return (<div style={{ 
+    display: 'flex',
+    height: '100%',
+    justifyContent: 'center', 
+    alignItems: 'center' 
+  }}>
     <Header/>
     <Card style={{ 
-      width: '35%', 
-      maxWidth: '350px', 
-      margin: 'auto', 
-      marginTop: '40px',
+      width: '80%', 
+      maxWidth: '20rem', 
       border: '1px solid #000000'
     }}>
       <Card.Body>
@@ -165,5 +168,5 @@ export const Register = () => {
       </Card.Body>
     </Card>
     <Alert onError={onError} setOnError={setOnError}/>
-  </>);  
+  </div>);  
 }
