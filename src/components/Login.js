@@ -6,6 +6,7 @@ import { useAuth } from '../context/auth';
 import { post } from '../Utils';
 
 
+
 export const Login = (props) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -38,6 +39,7 @@ export const Login = (props) => {
             }, { withAuth: false });
             if (result.token) {
               const token = result.token;
+              console.log(token);
               signIn(token);
               if (props.location &&
                 props.location.state &&
@@ -46,6 +48,7 @@ export const Login = (props) => {
                 history.push(props.location.state.redirectFrom);
               }
               else {
+
                 history.push('/profile');
               }
             }

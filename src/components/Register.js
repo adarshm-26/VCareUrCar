@@ -34,6 +34,7 @@ export const Register = () => {
       age: undefined,
       phone: undefined,
       email: '',
+      type:'customer',
       password: '',
       cpassword: ''
     },
