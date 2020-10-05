@@ -2,7 +2,7 @@ import React,{ useState, useEffect } from 'react';
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { Home, PrivateRoute, Login, Register, Profile } from './components/Components';
+import { Home, PrivateRoute, Login, Register, Profile, Jobs, Cars } from './components/Components';
 import { AuthContext } from './context/auth';
 
 const App = () => {
@@ -33,10 +33,9 @@ const App = () => {
             <Route path='/login' component={Login}/>
             <Route path='/register' component={Register}/>
             <PrivateRoute path='/profile' component={Profile}/>
-            {/* <PrivateRoute path='/jobs' component={Jobs}/>
-            <PrivateRoute path='/cars' component={Cars}/> */}
-            {/* <Route path='/services' component={Services}/>
-            <Route path='/profile' component={Profile}/> */}
+            <PrivateRoute path='/jobs' component={Jobs}/>
+            <PrivateRoute path='/cars' component={Cars}/>
+            {/* <Route path='/services' component={Services}/>*/}
           </Switch>
         </Router>
       </div>
