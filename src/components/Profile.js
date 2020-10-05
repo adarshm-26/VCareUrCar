@@ -1,6 +1,7 @@
 import React from 'react';
 import { Card, Spinner, Row, Col, Container } from 'react-bootstrap';
 import { Header, Alert } from './Components';
+import { get } from '../Utils';
 
 const profileIcon = <svg width="100%" height="100%" viewBox="0 0 16 16" className="bi bi-person-circle" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
   <path d="M13.468 12.37C12.758 11.226 11.195 10 8 10s-4.757 1.225-5.468 2.37A6.987 6.987 0 0 0 8 15a6.987 6.987 0 0 0 5.468-2.63z"/>
@@ -20,7 +21,7 @@ export const Profile = () => {
 
   const attemptFetching = () => {
     setLoading(true);
-    fetchUserDetails()
+    get('/user/me')
     .then(user => {
       setUser(user);
     })
@@ -108,18 +109,4 @@ export const Profile = () => {
       </div>
       <Alert onError={onError} setOnError={setOnError}/>
   </>);
-}
-
-const fetchUserDetails = async () => {
-  const token = localStorage.getItem('token');
-  let response = await fetch('http://localhost:1112/user/me', {
-    method: 'GET',
-    headers: {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json',
-      'cache': 'no-cache'
-    }
-  });
-  let userDetails = await response.json();
-  return userDetails;
 }

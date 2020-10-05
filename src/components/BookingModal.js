@@ -2,6 +2,7 @@ import React from 'react';
 import { Modal, Form, Spinner, Row, Col } from 'react-bootstrap';
 import { Button } from './Components';
 import { Services } from './ServicesList'; 
+import { post, get } from '../Utils';
 
 export const BookingModal = (props) => {
   const [cars, setCars] = React.useState('');
@@ -13,7 +14,7 @@ export const BookingModal = (props) => {
   const fetchAll = async () => {
     setLoading(true);
     try {
-      let carsRes = await fetchUserCars();
+      let carsRes = await get('/cars/byUser/my');
       setCars(carsRes);
       if (carsRes.length > 0) setSelectedCar(carsRes[0].id);
       let defaultSelectedServices = {};
@@ -41,34 +42,19 @@ export const BookingModal = (props) => {
   const handleSubmit = async (event) => {
     event.preventDefault();
     try {
-      let token = localStorage.getItem('token');
       let selectedServices = [];
       Services.forEach((service, index) => {
         if (services[index])
           selectedServices.push(service);
       });
-      let response = await fetch('http://localhost:1112/jobs/book', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-          'cache': 'no-cache'
-        },
-        body: JSON.stringify({
-          carId: selectedCar,
-          customerId: props.user.id,
-          status: 'BOOKED',
-          bookingDate: new Date(),
-          services: selectedServices
-        })
-      })
-      if (response.ok) {
-        let res = await response.json();
-        console.log(JSON.stringify(res));
-      }
-      else {
-        console.log(response.statusText);
-      }
+      let result = await post('/jobs/book', {
+        carId: selectedCar,
+        customerId: props.user.id,
+        status: 'BOOKED',
+        bookingDate: new Date(),
+        services: selectedServices
+      }, { getResult: false });
+      console.log(result);
     } catch (e) {
       console.error(e);
     }
@@ -79,8 +65,8 @@ export const BookingModal = (props) => {
       fetchAll();
   }, [props.show]);
 
-  return (<Modal show={props.show} size='lg'>
-    <Modal.Header>
+  return (<Modal show={props.show} size='lg' onHide={props.handleClose}>
+    <Modal.Header closeButton>
       <Modal.Title style={{ fontFamily: 'Sansita' }}>Book an appointment</Modal.Title>
     </Modal.Header>
     {
@@ -146,18 +132,4 @@ export const BookingModal = (props) => {
       </>
     }
   </Modal>);
-}
-
-const fetchUserCars = async () => {
-  const token = localStorage.getItem('token');
-  let response = await fetch('http://localhost:1112/cars/byUser/my', {
-    method: 'GET',
-    headers: {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json',
-      'cache': 'no-cache'
-    }
-  });
-  let carDetails = await response.json();
-  return carDetails;
 }
