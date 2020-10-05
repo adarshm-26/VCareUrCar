@@ -3,6 +3,7 @@ import { Card, Form } from 'react-bootstrap';
 import { Header, Alert, Button } from './Components';
 import { Link, useHistory } from 'react-router-dom';
 import { useAuth } from '../context/auth';
+import { post } from '../Utils';
 
 
 
@@ -13,13 +14,16 @@ export const Login = (props) => {
   const { signIn } = useAuth();
   const history = useHistory();
 
-  return (<>
+  return (<div style={{ 
+    display: 'flex',
+    height: '100%',
+    justifyContent: 'center', 
+    alignItems: 'center' 
+  }}>
     <Header/>
     <Card style={{ 
-      width: '35%', 
-      maxWidth: '350px', 
-      margin: 'auto', 
-      marginTop: '40px',
+      width: '80%', 
+      maxWidth: '20rem', 
       border: '1px solid #000000'
     }}>
       <Card.Body>
@@ -29,24 +33,11 @@ export const Login = (props) => {
           e.preventDefault();
           console.log('Signing in....');
           try {
-            let response = await fetch('http://localhost:1112/authenticate', {
-              method: 'POST',
-              headers: {
-                'content-type': 'application/json',
-                'credentials': 'include',
-                'cache': 'no-cache',
-                'mode': 'cors'
-              },
-              body: JSON.stringify({
-                username: email,
-                password: password
-              })
-            });
-            let result = await response.json();
-            
-            console.log(result[1]);
+            let result = await post('/authenticate', {
+              username: email,
+              password: password
+            }, { withAuth: false });
             if (result.token) {
-
               const token = result.token;
               console.log(token);
               signIn(token);
@@ -100,5 +91,5 @@ export const Login = (props) => {
       </Card.Body>
     </Card>
     <Alert onError={onError} setOnError={setOnError}/>
-  </>);  
+  </div>);  
 }

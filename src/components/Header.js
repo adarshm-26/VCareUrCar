@@ -8,25 +8,35 @@ const icon = <svg width="1em" height="1em" viewBox="0 0 16 16" className="bi bi-
   <path fillRule="evenodd" d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1zM0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8z"/>
 </svg>;
 
-export const Header = () => {
+export const Header = (props) => {
   const { signOut } = useAuth();
 
-  return <Navbar style={{ background: '#d9f8ff' }}>
-  <Navbar.Brand href='/' style={{ fontSize: '2rem', paddingLeft: '30px'}}>VCareUrCar</Navbar.Brand>
+  return <Navbar 
+  fixed='top' 
+  expand='lg' 
+  style={{ 
+    backgroundColor: props.backgroundColor ?
+    props.backgroundColor : '#d9f8ff' 
+  }}>
+  <Navbar.Brand href='/' style={{ 
+    fontSize: '2rem', 
+    paddingLeft: '1rem', 
+    color: props.fontColor 
+  }}>VCareUrCar</Navbar.Brand>
   <Navbar.Toggle aria-controls="basic-navbar-nav" />
   <Navbar.Collapse id="basic-navbar-nav">
     <Nav style={{ marginLeft: 'auto' }}>
-      <Nav.Link href='/'>Home</Nav.Link>
-      <Nav.Link href="#link">Services</Nav.Link>
+      <Nav.Link href='/' style={{ color: props.fontColor }}>Home</Nav.Link>
+      <Nav.Link href="#link" style={{ color: props.fontColor }}>Services</Nav.Link>
       {
         localStorage.getItem('token') !== null ?
         <>
-          <Nav.Link href='/jobs'>My Jobs</Nav.Link>
-          <Nav.Link href='/cars'>My Cars</Nav.Link>
-          <Nav.Link href='/profile'>{icon}</Nav.Link>
-          <Nav.Link onClick={signOut}>Sign Out</Nav.Link>
+          <Nav.Link href='/jobs' style={{ color: props.fontColor }}>My Jobs</Nav.Link>
+          <Nav.Link href='/cars' style={{ color: props.fontColor }}>My Cars</Nav.Link>
+          <Nav.Link href='/profile' style={{ color: props.fontColor }}>{icon}</Nav.Link>
+          <Nav.Link onClick={signOut} style={{ color: props.fontColor }}>Sign Out</Nav.Link>
         </> :
-        <Nav.Link href="/login">SignIn</Nav.Link>
+        <Nav.Link href="/login" style={{ color: props.fontColor }}>SignIn</Nav.Link>
       }
     </Nav>
   </Navbar.Collapse>
