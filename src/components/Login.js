@@ -48,7 +48,6 @@ export const Login = (props) => {
                 history.push(props.location.state.redirectFrom);
               }
               else {
-
                 history.push('/profile');
               }
             }

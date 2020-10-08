@@ -21,7 +21,7 @@ export const Cars = () => {
     setLoading(true);
     fetchUserCars()
       .then(car => {
-        setCar(car);
+        setCar(car.content);
         console.log(car);
       })
       .catch(e => {

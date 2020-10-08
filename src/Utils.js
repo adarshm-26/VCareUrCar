@@ -6,11 +6,12 @@ const SERVER_PORT = '1112';
  * handle errors in caller function
  * @param {string} url
  * @param {object} body
- * @param {boolean} getResult set false, if you dont want result object
- * @param {boolean} withAuth set false, if you dont want Authorization
+ * @param {object} options
+ * @field getResult set false, if you dont want result object
+ * @field withAuth set false, if you dont want Authorization
  * header in request
  */
-export const post = async (url, body, { getResult = true, withAuth = true }) => {
+export const post = async (url, body, { getResult = true, withAuth = true } = {}) => {
   let token = localStorage.getItem('token');
   let headers = {
     'Content-Type': 'application/json',
@@ -24,9 +25,11 @@ export const post = async (url, body, { getResult = true, withAuth = true }) => 
     cache: 'no-cache',
     body: JSON.stringify(body)
   });
-  if (response.ok && getResult) {
-    let result = await response.json();
-    return result;
+  if (response.ok) {
+    if (getResult) {
+      let result = await response.json();
+      return result;
+    }
   } else {
     throw new Error('POST error: ' + response.status);
   }
