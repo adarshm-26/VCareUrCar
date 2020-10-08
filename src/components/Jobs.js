@@ -1,17 +1,13 @@
 import React from 'react';
 import { Card, Spinner, Modal, Container, ListGroup, Badge, Table, Row } from 'react-bootstrap';
-import { Header, Alert, Button, BookingModal } from './Components';
-import { get } from '../Utils';
-
-const refreshIcon = <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M7.5 14.5C3.63401 14.5 0.5 11.366 0.5 7.5C0.5 5.26904 1.54367 3.28183 3.1694 2M7.5 0.5C11.366 0.5 14.5 3.63401 14.5 7.5C14.5 9.73096 13.4563 11.7182 11.8306 13M11.5 10V13.5H15M0 1.5H3.5V5" stroke="black"/>
-</svg>;
+import { Header, Alert, Button, BookingModal, refreshIcon } from './Components';
+import { get, post } from '../Utils';
+import { useHistory } from 'react-router-dom';
 
 const statusToBadgeColorMap = {
   'BOOKED': 'info',
   'SCHEDULED': 'info',
   'UNDER_SERVICE': 'warning',
-  'AWAITING_VERIFICATION': 'danger',
   'VERIFIED': 'info',
   'COMPLETED': 'success'
 }
@@ -31,7 +27,20 @@ export const Jobs = () => {
       let userRes = await get('/user/me');
       setUser(userRes);
       let jobsRes = await get('/jobs/byUser/my');
-      setJobs(jobsRes);
+<<<<<<< Updated upstream
+      if (userRes.type === 'supervisor') {
+        let newJobsRes = await get('/jobs/byStatus/BOOKED');
+        let all = [];
+        all.push(...newJobsRes.content);
+        all.push(...jobsRes.content);
+        setJobs(all);
+      }
+      else {
+        setJobs(jobsRes.content);
+      }
+=======
+      setJobs(jobsRes['content']);
+>>>>>>> Stashed changes
     }
     catch (e) {
       console.error(e);
@@ -42,9 +51,11 @@ export const Jobs = () => {
     }
   }
 
+  const stableAttemptFetching = React.useCallback(attemptFetching, []);
+
   React.useEffect(() => {
-    attemptFetching();
-  }, []);
+    stableAttemptFetching();
+  }, [stableAttemptFetching]);
 
   const triggerShowModal = (job) => {
     setModalContent(job);
@@ -52,7 +63,6 @@ export const Jobs = () => {
   }
 
   const hideModal = () => setShowModal(false);
-
   return (<>
     <Header/>
     <div style={{ 
@@ -85,7 +95,7 @@ export const Jobs = () => {
                   textDecoration: 'underline'
                 }}>My Jobs</h1>
                 {
-                  user.type === 'customer' ?
+                  user.type === 'customer' || user.type === 'admin' ?
                   <div style={{ flex: 2, textAlign: 'end' }}>
                     <Button
                       onClick={() => setShowBookingModal(true)}
@@ -113,7 +123,10 @@ export const Jobs = () => {
                       onClick={() => triggerShowModal(job)}>
                       <JobDetailsLayout {...job}/>
                     </ListGroup.Item>
-                  ) : <p>No jobs found</p>
+                  ) : <p>
+                    No jobs found, contact Administrator<br/>
+                    if you think this is a mistake
+                  </p>
                 }
               </ListGroup>
             </div>
@@ -145,6 +158,10 @@ const JobDetailsLayout = (props) => {
     </div>
     {
       props.status !== 'VERIFIED' || props.status !== 'COMPLETED' ?
+      props.status === 'BOOKED' ?
+      <div style={{ flex: 2}}>
+        Pending acknowledgement from Supervisor
+      </div> :
       <div style={{ flex: 2 }}>
         Should be over by {new Date(props.deadlineDate).toDateString()}
       </div> :
@@ -156,42 +173,110 @@ const JobDetailsLayout = (props) => {
 }
 
 const JobDetailsModal = (props) => {
-  const [loading, setLoading] = React.useState(false);
-  const [technicians, setTechnicians] = React.useState(undefined);
-  const [selectedTech, setSelectedTech] = React.useState('');
-  const [deadline, setDeadline] = React.useState('');
-  const [serviceLog, setServiceLog] = React.useState('');
+  const history = useHistory();
+  const [action, setAction] = React.useState({
+    label: '',
+    onClick: () => {}
+  });
 
-  const handleSchedule = async () => {
-    
+  const schedule = () => {
+    history.push({
+      pathname: '/schedule',
+      state: {
+        job: props.content,
+        user: props.user,
+      }
+    });
+  }
+  
+  const logService = async () => {
+    history.push({
+      pathname: '/logService',
+      state: {
+        job: props.content,
+        user: props.user,
+      }
+    });
+  }
+  
+  const verify = async () => {
+    history.push({
+      pathname: '/verify',
+      state: {
+        job: props.content,
+        user: props.user,
+      }
+    });
   }
 
-  const attemptFetch = async () => {
-    setLoading(true);
-    try {
-      let result = await get('/user/all')
-      setTechnicians(result);
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setLoading(false);
-    }
-  }
+  const stableSchedule = React.useCallback(schedule, 
+    [props.content, props.user]);
+  const stableVerify = React.useCallback(verify, 
+    [props.content, props.user]);
+  const stableLogService = React.useCallback(logService, 
+    [props.content, props.user]);
 
   React.useEffect(() => {
-    if (props.content.status === 'BOOKED' &&
-    (props.user.type === 'admin' || props.user.type === 'supervisor')) {
-      attemptFetch();
+    const actionBuilder = async () => {
+      try {
+        if (props.content.status === 'BOOKED' &&
+        (props.user.type === 'admin' || 
+        props.user.type === 'supervisor')) {
+          setAction({
+            label: 'Schedule',
+            onClick: stableSchedule
+          });
+        }
+        else if ((props.content.status === 'SCHEDULED' || 
+        props.content.status === 'UNDER_SERVICE') &&
+        (props.user.type === 'admin' || 
+        props.user.type === 'technician')) {
+          setAction({
+            label: 'Log Services',
+            onClick: stableLogService
+          });
+        }
+        else if (props.content.status === 'UNDER_SERVICE' &&
+        (props.user.type === 'admin' || 
+        props.user.type === 'supervisor')) {
+          setAction({
+            label: 'Verify Services',
+            onClick: stableVerify
+          })
+        }
+      } catch (e) {
+        console.error(e);
+      }
     }
-  }, [props.user.type, props.content.status]);
+    actionBuilder();
+  }, [props.user.type, 
+    props.content.status,
+    stableSchedule,
+    stableVerify,
+    stableLogService]);
 
   return (
-  <Modal show={props.show} onHide={props.handleClose} size='lg'>
-    <Modal.Header closeButton>
-      <Modal.Title style={{ fontFamily: 'Sansita' }}>Job Specifics</Modal.Title>
+  <Modal 
+    show={props.show} 
+    onHide={props.handleClose} 
+    size='lg'>
+    <Modal.Header>
+      <Modal.Title 
+        style={{ fontFamily: 'Sansita' }}>
+        Job Specifics
+      </Modal.Title>
+      {
+        action.label !== '' ?
+        <div style={{ marginLeft: 'auto', marginRight: 0 }}>
+          <Button 
+            onClick={action.onClick} 
+            label={action.label}/>
+        </div> : 
+        <></>
+      }
     </Modal.Header>
     <Modal.Body style={{ maxHeight: '25rem', overflow: 'scroll' }}>
-      <Table striped hover responsive>
+      <Table hover>
         <tbody>
         {
           typeof props.content === 'object' ? 
@@ -205,32 +290,26 @@ const JobDetailsModal = (props) => {
         }
         </tbody>
       </Table>
-      <Table striped hover responsive>
-        <tbody>
+      <h5>Services :</h5>
+      <ListGroup variant='flush'>
         {
           props.content?.services?.map((service, index) => 
-          <tr style={{ flexDirection: 'row' }} key={index}>
+          <Row key={index}>
           {
             typeof service === 'object' ? 
             Object.keys(service).map((key, index) => 
               service[key] ? 
-              <td key={index}>
+              <div style={{ marginLeft: 20 }} key={index}>
                 {service[key]}
-              </td> : <></>
+              </div> : <></>
             ) : <></>
           } 
-          </tr>)
+          </Row>)
         }
-        </tbody>
-      </Table>
+      </ListGroup>
     </Modal.Body>
     <Modal.Footer>
       <Button onClick={props.handleClose} label='Ok'/>
-      { 
-        props.content?.status === 'BOOKED' && 
-        (props.user?.type === 'admin' || props.user?.type === 'supervisor') ? 
-        <Button onClick={handleSchedule} label='Schedule'/> : <></> 
-      }
     </Modal.Footer>
   </Modal>);
 }

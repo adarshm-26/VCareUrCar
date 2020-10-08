@@ -1,23 +1,32 @@
 import React from 'react';
 import { Modal, Form, Spinner, Row, Col } from 'react-bootstrap';
-import { Button } from './Components';
+import { Button, Alert } from './Components';
 import { Services } from './ServicesList'; 
 import { post, get } from '../Utils';
+import { useHistory } from 'react-router-dom';
 
 export const BookingModal = (props) => {
   const [cars, setCars] = React.useState('');
+  const [user, setUser] = React.useState('');
   const [selectedCar, setSelectedCar] = React.useState('');
   const [loading, setLoading] = React.useState(false);
   const [services, setServices] = React.useState('');
-  const [result, setResult] = React.useState('');
+  const history = useHistory();
 
   const fetchAll = async () => {
     setLoading(true);
     try {
       let carsRes = await get('/cars/byUser/my');
-      setCars(carsRes);
+<<<<<<< Updated upstream
+      setCars(carsRes.content);
+      if (carsRes.content.length > 0) 
+        setSelectedCar(carsRes.content[0].id);
+      let defaultSelectedServices = [];
+=======
+      setCars(carsRes['content']);
       if (carsRes.length > 0) setSelectedCar(carsRes[0].id);
       let defaultSelectedServices = {};
+>>>>>>> Stashed changes
       Services.map((value, index) => defaultSelectedServices[index] = false);
       setServices(defaultSelectedServices);
     } catch (e) {
@@ -28,9 +37,8 @@ export const BookingModal = (props) => {
   }
 
   const handleServiceSelect = (event) => {
-    event.preventDefault();
-    let newServices = {...services};
-    newServices[event.target.name] = event.target.value;
+    let newServices = [...services];
+    newServices[event.target.name] = !newServices[event.target.name];
     setServices(newServices);
   }
 
@@ -47,14 +55,14 @@ export const BookingModal = (props) => {
         if (services[index])
           selectedServices.push(service);
       });
-      let result = await post('/jobs/book', {
+      await post('/jobs/book', {
         carId: selectedCar,
-        customerId: props.user.id,
+        customerId: user,
         status: 'BOOKED',
-        bookingDate: new Date(),
+        bookingDate: new Date().getTime(),
         services: selectedServices
       }, { getResult: false });
-      console.log(result);
+      history.replace('/jobs');
     } catch (e) {
       console.error(e);
     }
@@ -63,11 +71,20 @@ export const BookingModal = (props) => {
   React.useEffect(() => {
     if (props.show)
       fetchAll();
-  }, [props.show]);
+    if (props.user.type !== 'admin')
+      setUser(props.user.id);
+  }, [props.show, props.user]);
 
-  return (<Modal show={props.show} size='lg' onHide={props.handleClose}>
+  return (
+  <Modal 
+    show={props.show} 
+    size='lg' 
+    onHide={props.handleClose}
+    centered>
     <Modal.Header closeButton>
-      <Modal.Title style={{ fontFamily: 'Sansita' }}>Book an appointment</Modal.Title>
+      <Modal.Title style={{ fontFamily: 'Sansita' }}>
+        Book an appointment
+      </Modal.Title>
     </Modal.Header>
     {
       loading ?
@@ -80,13 +97,53 @@ export const BookingModal = (props) => {
       <>
         <Modal.Body>
           <Form>
-            <Form.Group as={Row} controlId='selectCars' key='car'>
-              <Form.Label column sm='3'>Car to be serviced : </Form.Label>
+            {
+              props.user?.type !== 'admin' ?
+              <></> :
+              <Form.Group 
+                as={Row} 
+                controlId='userInput' 
+                key='user'>
+                <Form.Label column sm='3'>
+                  Customer User ID : 
+                </Form.Label>
+                <Col sm='7'>
+                  <Form.Control
+                    name='user'
+                    value={user}
+                    placeholder='Exact ID of customer'
+                    onChange={(e) => {
+                      e.preventDefault();
+                      setUser(e.target.value);
+                    }}/>
+                </Col>
+              </Form.Group>
+            }
+            <Form.Group 
+              as={Row} 
+              controlId='selectCars' 
+              key='car'>
+              <Form.Label column sm='3'>
+                Car to be serviced : 
+              </Form.Label>
               <Col sm='7'>
-                <Form.Control as='select' onChange={handleCarSelect}>
+                <Form.Control 
+                  as='select' 
+                  onChange={handleCarSelect}>
                   {
-                    typeof cars === 'object' ? cars.map((car, index) => {
+<<<<<<< Updated upstream
+                    typeof cars === 'object' &&
+                    cars.length > 0 ? 
+                    cars.map((car, index) => {
+                      return <option 
+                        key={index} 
+                        value={car.id}>
+                          {car.model}
+                        </option>
+=======
+                    typeof cars === 'object' && cars.length > 0 ? cars.map((car, index) => {
                       return <option key={index} value={car.id}>{car.model}</option>
+>>>>>>> Stashed changes
                     }) :
                     <option>No cars found</option>
                   }
@@ -97,9 +154,11 @@ export const BookingModal = (props) => {
               as={Row} 
               controlId='selectServices' 
               key='service'
-              style={{ alignItems: 'center' }}
-              >
-              <Form.Label column sm='3'>Select services : <br/>(scroll to see more)</Form.Label>
+              style={{ alignItems: 'center' }}>
+              <Form.Label column sm='3'>
+                Select services : <br/>
+                (scroll to see more)
+              </Form.Label>
               <Col 
                 sm='7' 
                 style={{ 
@@ -108,14 +167,13 @@ export const BookingModal = (props) => {
                   overflowX: 'hidden',
                 }}>
                 {
-                  typeof services === 'object' ? Object.keys(services).map((serviceInd, index) => {
+                  typeof services === 'object' ? 
+                  services?.map((serviceInd, index) => {
                     return <Form.Check
                       type='checkbox'
-                      id={serviceInd}
-                      name={serviceInd}
+                      name={index}
                       key={index}
-                      label={Services[serviceInd].name}
-                      value={services[serviceInd]}
+                      label={Services[index].name}
                       onChange={handleServiceSelect}
                     />;
                   }) :

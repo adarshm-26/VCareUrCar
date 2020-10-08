@@ -1,11 +1,16 @@
 import React, { useState } from 'react';
-import { Spinner, Row, Col, Table, Modal, Button, Container } from 'react-bootstrap';
+import { Spinner, Row, Col, Table, Modal, Button, Container, Badge, ListGroup } from 'react-bootstrap';
 import { Header, Alert } from './Components';
 import { useHistory } from 'react-router-dom';
 import { AddCar } from './AddCar';
+import { get } from '../Utils.js';
+
+const refreshIcon = <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M7.5 14.5C3.63401 14.5 0.5 11.366 0.5 7.5C0.5 5.26904 1.54367 3.28183 3.1694 2M7.5 0.5C11.366 0.5 14.5 3.63401 14.5 7.5C14.5 9.73096 13.4563 11.7182 11.8306 13M11.5 10V13.5H15M0 1.5H3.5V5" stroke="black" />
+</svg>;
 
 export const Cars = () => {
-  const [car, setCar] = React.useState(undefined);
+  const [cars, setCar] = React.useState('');
   const [loading, setLoading] = React.useState(false);
   const [onError, setOnError] = React.useState(undefined);
   const token = localStorage.getItem('token');
@@ -17,11 +22,12 @@ export const Cars = () => {
   const handleShow = () => setShow(true);
   const handleAddCarClose = () => setAddCar(false);
 
-  if (!loading && !onError && !car) {
+  const attemptFetching = async () => {
     setLoading(true);
+<<<<<<< Updated upstream
     fetchUserCars()
       .then(car => {
-        setCar(car);
+        setCar(car.content);
         console.log(car);
       })
       .catch(e => {
@@ -31,12 +37,29 @@ export const Cars = () => {
       .finally(() => {
         setLoading(false);
       })
+=======
+    try {
+      let carRes = await get('/cars/byUser/my');
+      setCar(carRes['content']);
+    }
+    catch (e) {
+      console.error(e);
+      setOnError(e.message);
+    }
+    finally {
+      setLoading(false);
+    }
+>>>>>>> Stashed changes
   }
+  React.useEffect(() => {
+    attemptFetching();
+  }, []);
+  console.log(cars)
   return (<>
     <Header />
     <div style={{ justifyContent: 'center', alignItems: 'center', backgroundColor: 'white' }}>
       <Container>
-        <Row style={{ height: '40px' }}></Row>
+        <Row style={{ height: '100px' }}></Row>
         <Row className="justify-content-md-center">
           <Col xs={12} md={8}>
             <h1 style={{
@@ -67,42 +90,59 @@ export const Cars = () => {
       <Container>
         <Row className="justify-content-md-center">
           {CarModal()}
-          {!car ?
-            <Spinner
-              animation="border"
-              role="status"
-              style={{ margin: '10%' }}>
-              <span className="sr-only">Loading...</span>
-            </Spinner> :
-            <Table striped bordered hover size="sm"  >
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>Car Brand</th>
-                  <th>Car Model</th>
-                  <th>Delete</th>
-                </tr>
-              </thead>
-              <tbody>
-                {car.map(post => {
-                  return (
-                    <tr>
-                      <td>{post.id}</td>
-                      <td >{post.brand}</td>
-                      <td>{post.model}</td>
-                      {Example(post.id)}
-                      <td><Button variant="outline-light" onClick={handleShow} title="delete car"><img src="https://www.freeiconspng.com/uploads/delete-error-exit-remove-stop-x-cross-icon--28.png" width="20px" height="20px" alt="delete " /></Button></td>
-                    </tr>
-                  )
+          {
+
+            loading ?
+              <Spinner
+                animation="border"
+                role="status"
+                style={{ margin: '10%' }}>
+                <span className="sr-only">Loading...</span>
+              </Spinner> :
+              cars ?
+                <>{
+                  typeof cars === 'object' && cars.length > 0 ?
+                    <Table striped bordered hover size="md">
+                      <thead>
+                        <tr>
+                          <th>#</th>
+                          <th>Car Brand</th>
+                          <th>Car Model</th>
+                          <th>Delete</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {
+
+                          cars.map((car, index) =>
+                            <tr>
+                              <td>{car.id}</td>
+                              <td>{car.brand}</td>
+                              <td>{car.model}</td>
+                              {Example(car.id)}
+                              <td><Button varient="outline-light" onClick={handleShow} title="delete car">delete</Button></td>
+                            </tr>
+                          )
+
+                        }
+                      </tbody>
+                    </Table> : <p>No cars found</p>
                 }
-                )}
-              </tbody>
-            </Table>
-          }</Row>
+                </> : <div
+                  onClick={attemptFetching}
+                  style={{ fontSize: 20, cursor: 'pointer' }}>
+                  <div>{refreshIcon}</div>
+                  <div>Click to retry</div>
+                </div>
+
+          }
+        </Row>
+
       </Container>
     </div>
     <Alert onError={onError} setOnError={setOnError} />
   </>);
+
   function remove(carid) {
     return async (e) => {
       e.preventDefault();
@@ -121,7 +161,7 @@ export const Cars = () => {
           })
         });
         let result = await response.json();
-        history.push('/removeCar');
+        history.push('/cars');
       } catch (e) {
         console.error(e);
         setOnError(e.message);
@@ -131,7 +171,7 @@ export const Cars = () => {
   function Example(id) {
     return (
       <>
-        <Modal show={show} onHide={handleClose} animation={false} size="lg"
+        <Modal show={show} onHide={handleClose} animation={false} size="sm"
           aria-labelledby="contained-modal-title-vcenter"
           centered >
           <Modal.Header closeButton>
@@ -164,21 +204,8 @@ export const Cars = () => {
           <AddCar />
         </Modal.Body>
       </Modal>
-    </>)
+    </>);
   }
+
 }
 
-const fetchUserCars = async () => {
-  const token = localStorage.getItem('token');
-  let response = await fetch('http://localhost:1112/cars/byUser/my', {
-    method: 'GET',
-    headers: {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json',
-      'cache': 'no-cache'
-    }
-  });
-  let carDetails = await response.json();
-
-  return carDetails;
-}
