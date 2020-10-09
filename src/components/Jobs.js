@@ -27,7 +27,6 @@ export const Jobs = () => {
       let userRes = await get('/user/me');
       setUser(userRes);
       let jobsRes = await get('/jobs/byUser/my');
-<<<<<<< Updated upstream
       if (userRes.type === 'supervisor') {
         let newJobsRes = await get('/jobs/byStatus/BOOKED');
         let all = [];
@@ -38,9 +37,6 @@ export const Jobs = () => {
       else {
         setJobs(jobsRes.content);
       }
-=======
-      setJobs(jobsRes['content']);
->>>>>>> Stashed changes
     }
     catch (e) {
       console.error(e);

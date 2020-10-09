@@ -17,16 +17,10 @@ export const BookingModal = (props) => {
     setLoading(true);
     try {
       let carsRes = await get('/cars/byUser/my');
-<<<<<<< Updated upstream
       setCars(carsRes.content);
       if (carsRes.content.length > 0) 
         setSelectedCar(carsRes.content[0].id);
       let defaultSelectedServices = [];
-=======
-      setCars(carsRes['content']);
-      if (carsRes.length > 0) setSelectedCar(carsRes[0].id);
-      let defaultSelectedServices = {};
->>>>>>> Stashed changes
       Services.map((value, index) => defaultSelectedServices[index] = false);
       setServices(defaultSelectedServices);
     } catch (e) {
@@ -131,7 +125,6 @@ export const BookingModal = (props) => {
                   as='select' 
                   onChange={handleCarSelect}>
                   {
-<<<<<<< Updated upstream
                     typeof cars === 'object' &&
                     cars.length > 0 ? 
                     cars.map((car, index) => {
@@ -140,10 +133,6 @@ export const BookingModal = (props) => {
                         value={car.id}>
                           {car.model}
                         </option>
-=======
-                    typeof cars === 'object' && cars.length > 0 ? cars.map((car, index) => {
-                      return <option key={index} value={car.id}>{car.model}</option>
->>>>>>> Stashed changes
                     }) :
                     <option>No cars found</option>
                   }

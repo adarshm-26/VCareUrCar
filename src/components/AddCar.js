@@ -1,4 +1,4 @@
-import React, { useState ,component} from 'react';
+import React, { useState } from 'react';
 import { Form, Spinner } from 'react-bootstrap';
 import { Alert, Button } from './Components';
 import { useHistory } from 'react-router-dom';
@@ -45,14 +45,12 @@ export const AddCar = () => {
       console.log(values);
       formik.values.ownerId = user.id;
       try {
-        let response = await post('/cars/add', {
+         await post('/cars/add', {
           
          brand:formik.values.brand,
          model:formik.values.model,
          ownerId:formik.values.ownerId
         },{getResult:false});
-        let result = await response.json();
-        alert(result);
         history.push('/cars');
       } catch (e) {
         console.error(e);

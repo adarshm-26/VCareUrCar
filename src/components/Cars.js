@@ -24,20 +24,6 @@ export const Cars = () => {
 
   const attemptFetching = async () => {
     setLoading(true);
-<<<<<<< Updated upstream
-    fetchUserCars()
-      .then(car => {
-        setCar(car.content);
-        console.log(car);
-      })
-      .catch(e => {
-        console.error(e);
-        setOnError(e.message);
-      })
-      .finally(() => {
-        setLoading(false);
-      })
-=======
     try {
       let carRes = await get('/cars/byUser/my');
       setCar(carRes['content']);
@@ -49,7 +35,6 @@ export const Cars = () => {
     finally {
       setLoading(false);
     }
->>>>>>> Stashed changes
   }
   React.useEffect(() => {
     attemptFetching();
@@ -148,7 +133,7 @@ export const Cars = () => {
       e.preventDefault();
       console.log('removing car');
       try {
-        let response = await fetch('http://localhost:1112/cars/remove', {
+         await fetch('http://localhost:1112/cars/remove', {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -160,7 +145,7 @@ export const Cars = () => {
             id: carid
           })
         });
-        let result = await response.json();
+        
         history.push('/cars');
       } catch (e) {
         console.error(e);
