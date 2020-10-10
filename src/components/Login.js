@@ -37,6 +37,8 @@ export const Login = (props) => {
               username: email,
               password: password
             }, { withAuth: false });
+            localStorage.setItem('usermail',email);
+            localStorage.setItem('userpassword',password);
             if (result.token) {
               const token = result.token;
               console.log(token);

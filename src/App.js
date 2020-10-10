@@ -13,7 +13,8 @@ import {
   Schedule,
   Verify,
   LogService,
-  Payment
+  Payment,
+  CheckMailVerification
 } from './components/Components';
 import { AuthContext } from './context/auth';
 
@@ -52,6 +53,7 @@ const App = () => {
             <PrivateRoute path='/logService' component={LogService} />
             {/* <Route path='/services' component={Services}/>*/}
             <Route path='/payment' component={Payment} />
+            <Route path='/verifymail' component={CheckMailVerification} />
           </Switch>
         </Router>
       </div>

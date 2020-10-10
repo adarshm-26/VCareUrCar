@@ -21,12 +21,17 @@ export const Cars = () => {
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
   const handleAddCarClose = () => setAddCar(false);
-
+  const [user, setUser] = useState('');
   const attemptFetching = async () => {
     setLoading(true);
     try {
       let carRes = await get('/cars/byUser/my');
       setCar(carRes['content']);
+      let userRes = await get('/user/me');
+      setUser(userRes);
+      if(user.enable===false){
+        history.push('/verifymail');
+      }
     }
     catch (e) {
       console.error(e);

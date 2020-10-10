@@ -3,6 +3,7 @@ import { Card, Spinner, Row, Col, Container, Modal, Form } from 'react-bootstrap
 import { Header, Alert, Button, profileIcon, refreshIcon } from './Components';
 import { get, post } from '../Utils';
 import { useFormik } from 'formik';
+import { useHistory } from 'react-router-dom';
 import * as Yup from 'yup';
 
 const RegisterEmployeeSchema = Yup.object().shape({
@@ -41,12 +42,16 @@ export const Profile = () => {
   const [showRegisterEmployeeModal, setShowRegisterEmployeeModal] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
   const [onError, setOnError] = React.useState(undefined);
+  const history = useHistory();
 
   const attemptFetching = async () => {
     setLoading(true);
     try {
       let user = await get('/user/me');
       setUser(user);
+      if(user.enable===false){
+        history.push('/verifymail');
+      }
     } catch(e) {
       console.error(e);
       setOnError(e.message);

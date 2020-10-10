@@ -20,6 +20,7 @@ export const Jobs = () => {
   const [showBookingModal, setShowBookingModal] = React.useState(false);
   const [modalContent, setModalContent] = React.useState('');
   const [onError, setOnError] = React.useState(undefined);
+  const history = useHistory();
 
   const attemptFetching = async () => {
     setLoading(true);
@@ -27,6 +28,9 @@ export const Jobs = () => {
       let userRes = await get('/user/me');
       setUser(userRes);
       let jobsRes = await get('/jobs/byUser/my');
+      if(userRes.enable===false){
+        history.push('/verifymail');
+      }
       if (userRes.type === 'supervisor') {
         let newJobsRes = await get('/jobs/byStatus/BOOKED');
         let all = [];
