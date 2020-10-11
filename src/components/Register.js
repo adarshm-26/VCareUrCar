@@ -45,11 +45,10 @@ export const Register = () => {
       console.log('Registering....');
       try {
         delete (values.cpassword);
-        let result = await post('/user/register', {
+        await post('/user/register', {
           ...values,
           type: 'customer'
         }, { getResult: false, withAuth: false });
-        alert(result);
         history.push('/profile');
       } catch (e) {
         console.error(e);

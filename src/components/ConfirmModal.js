@@ -1,11 +1,8 @@
 import React from 'react';
 import { Modal, Row, Col } from 'react-bootstrap';
 import { Button } from './Components';
-import { useHistory } from 'react-router-dom';
 
 export const ConfirmModal = (props) => {
-  const history = useHistory();
-
   return (
   <Modal 
     show={props.show} 

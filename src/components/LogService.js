@@ -7,7 +7,7 @@ import { useHistory } from 'react-router-dom';
 export const LogService = (props) => {
   const [loading, setLoading] = React.useState(false);
   const [car, setCar] = React.useState(undefined);
-  const [servicedServices, setServicedServices] = React.useState(props.location?.state?.job.services);
+  const [servicedServices, setServicedServices] = React.useState([]);
   const [onError, setOnError] = React.useState('');
   const [showConfirmModal, setShowConfirmModal] = React.useState(false);
   const [confirmModalContent, setConfirmModalContent] = React.useState('');
@@ -29,11 +29,16 @@ export const LogService = (props) => {
     }
   }
 
-  const stableFetching = React.useCallback(attemptFetching, []);
+  const stableFetching = React.useCallback(attemptFetching, [props.location?.state?.job.carId]);
 
   React.useEffect(() => {
+    let services = [];
+    props.location.state.job.services.forEach(service => {
+      services.push({...service});
+    });
+    setServicedServices(services);
     stableFetching();
-  }, [stableFetching]);
+  }, [stableFetching, props.location.state.job.services]);
 
   return (
     <>
@@ -79,7 +84,7 @@ export const LogService = (props) => {
                   </tr>)}
                   <tr>
                     <th>Booking Date</th>
-                    <td>{new Date(props.location.state.job.bookingDate).toDateString()}</td>
+                    <td>{new Date(props.location.state.job.bookingDate).toLocaleDateString()}</td>
                   </tr>
                   <tr>
                     <th>Car</th>
@@ -87,7 +92,7 @@ export const LogService = (props) => {
                   </tr>
                   <tr>
                     <th>Deadline Date</th>
-                    <td>{new Date(props.location.state.job.deadlineDate).toDateString()}</td>
+                    <td>{new Date(props.location.state.job.deadlineDate).toLocaleDateString()}</td>
                   </tr>
                   <tr>
                     <th>Technician</th>
@@ -98,7 +103,7 @@ export const LogService = (props) => {
               <h4>Services : </h4>
               <ListGroup style={{ textAlign: 'start' }}>
               {
-                props.location.state.job?.services?.map((service, index) => 
+                servicedServices.map((service, index) => 
                 <ListGroup.Item key={index}>
                   <p>{service.name}</p>
                   <Form.Group as={Row} key={`${index}-work`}>
@@ -109,7 +114,7 @@ export const LogService = (props) => {
                         data-idx={index}
                         as='textarea'
                         rows='2'
-                        value={servicedServices[index]?.work || ''}
+                        value={service.work || ''}
                         readOnly={service.completedDate}
                         onChange={(e) => {
                           e.preventDefault();
@@ -143,7 +148,8 @@ export const LogService = (props) => {
             <Button
               style={{ marginTop: 20 }}
               label='Submit'
-              onClick={() => {
+              onClick={(e) => {
+                e.preventDefault();
                 const action = async () => {
                   try {
                     let body = props.location.state.job;

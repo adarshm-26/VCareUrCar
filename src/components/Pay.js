@@ -14,7 +14,21 @@ const addRazorpay = async (paymentDetails) => {
     name: "VCareUrCar",
     description: "Test Transaction",
     order_id: paymentDetails.order_id,
-    handler: response => response,
+    handler: async response => {
+      try {
+        let verificationResult = await post('/jobs/pay/verify', {
+          receipt: paymentDetails.receipt,
+          ...response
+        });
+        if (verificationResult === true) {
+          alert('Payment successfully verified');
+        } else {
+          alert('Payment could not be verified');
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    },
     prefill: {
       name: paymentDetails.name,
       email: paymentDetails.email,
@@ -161,7 +175,7 @@ export const Pay = (props) => {
                     receipt: props.location.state.job.id
                   }
                   let result = await post('/jobs/pay/initiate', body);
-                  let initiateResult = await addRazorpay({
+                  await addRazorpay({
                     name: props.location.state.user.name,
                     email: props.location.state.user.email,
                     phone: props.location.state.user.phone,
@@ -169,15 +183,6 @@ export const Pay = (props) => {
                     order_id: result.orderId,
                     receipt: props.location.state.job.id
                   });
-                  let verificationResult = await post('/jobs/pay/verify', {
-                    receipt: props.location.state.job.id,
-                    ...initiateResult
-                  });
-                  if (verificationResult === true) {
-                    alert('Payment successfully verified');
-                  } else {
-                    alert('Payment could not be verified');
-                  }
                 } catch (e) {
                   console.error(e);
                   setOnError(e.message);

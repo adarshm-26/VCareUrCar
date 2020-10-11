@@ -115,7 +115,7 @@ export const Verify = (props) => {
                       type='checkbox'
                       name={index}
                       label='Verify'
-                      readOnly={service.verifiedDate || !service.completedDate}
+                      disabled={service.verifiedDate !== null || service.completedDate === null}
                       onChange={(e) => {
                         let services = [...verifiedServices];
                         console.log(e.target.value);

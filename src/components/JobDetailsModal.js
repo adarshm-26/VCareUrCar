@@ -62,6 +62,7 @@ export const JobDetailsModal = (props) => {
   React.useEffect(() => {
     const actionBuilder = async () => {
       try {
+        console.log(props.content.status, props.user.type);
         if (props.content.status === 'BOOKED' &&
         (props.user.type === 'admin' || 
         props.user.type === 'supervisor')) {
@@ -93,6 +94,12 @@ export const JobDetailsModal = (props) => {
           setAction({
             label: 'Make payment',
             onClick: stablePay
+          })
+        }
+        else {
+          setAction({
+            label: '',
+            onClick: () => {}
           })
         }
       } catch (e) {
