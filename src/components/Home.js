@@ -1,5 +1,5 @@
 import React from 'react';
-import { Carousel } from 'react-bootstrap';
+import { Carousel, Container } from 'react-bootstrap';
 import { Header } from './Components';
 import car1 from '../images/car1.png';
 import car2 from '../images/car2.jpg';
@@ -64,5 +64,14 @@ export const Home = () => {
         </Carousel.Caption>
       </Carousel.Item>
     </Carousel>
+    <Container>
+
+    </Container>
+    <Container>
+
+    </Container>
+    <Container>
+
+    </Container>
   </>);
 }

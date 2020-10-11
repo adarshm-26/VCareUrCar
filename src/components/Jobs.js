@@ -1,37 +1,54 @@
 import React from 'react';
-import { Card, Spinner, Modal, Container, ListGroup, Badge, Table, Row } from 'react-bootstrap';
-import { Header, Alert, Button, BookingModal } from './Components';
+import { 
+  Card, 
+  Spinner, 
+  Container, 
+  ListGroup, 
+  Badge, 
+  Row, 
+  Tabs, 
+  Tab } from 'react-bootstrap';
+import { 
+  Header, 
+  Alert, 
+  Button, 
+  BookingModal, 
+  JobDetailsModal, 
+  refreshIcon } from './Components';
 import { get } from '../Utils';
-
-const refreshIcon = <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M7.5 14.5C3.63401 14.5 0.5 11.366 0.5 7.5C0.5 5.26904 1.54367 3.28183 3.1694 2M7.5 0.5C11.366 0.5 14.5 3.63401 14.5 7.5C14.5 9.73096 13.4563 11.7182 11.8306 13M11.5 10V13.5H15M0 1.5H3.5V5" stroke="black"/>
-</svg>;
+import { Paginate } from './Paginate';
 
 const statusToBadgeColorMap = {
   'BOOKED': 'info',
   'SCHEDULED': 'info',
   'UNDER_SERVICE': 'warning',
-  'AWAITING_VERIFICATION': 'danger',
   'VERIFIED': 'info',
   'COMPLETED': 'success'
 }
 
 export const Jobs = () => {
   const [jobs, setJobs] = React.useState('');
+  const [newJobs, setNewJobs] = React.useState('');
   const [user, setUser] = React.useState('');
   const [loading, setLoading] = React.useState(false);
   const [showModal, setShowModal] = React.useState(false);
   const [showBookingModal, setShowBookingModal] = React.useState(false);
   const [modalContent, setModalContent] = React.useState('');
   const [onError, setOnError] = React.useState(undefined);
+  const [jobTabPage, setJobTabPage] = React.useState(0);
+  const [newJobTabPage, setNewJobTabPage] = React.useState(0);
 
   const attemptFetching = async () => {
     setLoading(true);
     try {
       let userRes = await get('/user/me');
       setUser(userRes);
-      let jobsRes = await get('/jobs/byUser/my');
+      let jobsRes = await get(`/jobs/byUser/my?page=${jobTabPage}`);
       setJobs(jobsRes);
+      if (userRes.type === 'supervisor') {
+        let newJobsRes = await get(`/jobs/byStatus/BOOKED?page=${newJobTabPage}`);
+        setNewJobs(newJobsRes);
+      }
     }
     catch (e) {
       console.error(e);
@@ -42,9 +59,12 @@ export const Jobs = () => {
     }
   }
 
+  const stableAttemptFetching = React.useCallback(attemptFetching, 
+    [jobTabPage, newJobTabPage]);
+
   React.useEffect(() => {
-    attemptFetching();
-  }, []);
+    stableAttemptFetching();
+  }, [stableAttemptFetching]);
 
   const triggerShowModal = (job) => {
     setModalContent(job);
@@ -52,7 +72,6 @@ export const Jobs = () => {
   }
 
   const hideModal = () => setShowModal(false);
-
   return (<>
     <Header/>
     <div style={{ 
@@ -60,7 +79,8 @@ export const Jobs = () => {
       height: '100%', 
       justifyContent: 'center', 
       alignItems: 'center',
-      background: 'white'
+      background: 'white',
+      overflow: 'auto'
     }}>
       {
         loading ?
@@ -70,7 +90,8 @@ export const Jobs = () => {
           style={{ margin: '10%' }}>
           <span className="sr-only">Loading...</span>
         </Spinner> :
-        jobs ?
+        (user.type === 'supervisor' ?
+        jobs && newJobs : jobs) ?
         <Container style={{
           width: '100%',
           height: '100%',
@@ -85,7 +106,7 @@ export const Jobs = () => {
                   textDecoration: 'underline'
                 }}>My Jobs</h1>
                 {
-                  user.type === 'customer' ?
+                  user.type === 'customer' || user.type === 'admin' ?
                   <div style={{ flex: 2, textAlign: 'end' }}>
                     <Button
                       onClick={() => setShowBookingModal(true)}
@@ -103,19 +124,80 @@ export const Jobs = () => {
                 show={showModal} 
                 content={modalContent}
                 user={user}/>
-              <ListGroup style={{ marginTop: 20 }}>
-                {
-                  typeof jobs === 'object' && jobs.length > 0 ? 
-                  jobs.map((job, index) => 
-                    <ListGroup.Item 
-                      key={index} 
-                      action
-                      onClick={() => triggerShowModal(job)}>
-                      <JobDetailsLayout {...job}/>
-                    </ListGroup.Item>
-                  ) : <p>No jobs found</p>
-                }
-              </ListGroup>
+              {
+                user.type === 'supervisor' ?
+                <Tabs 
+                  defaultActiveKey='my' 
+                  id='tabs'>
+                  <Tab 
+                    eventKey='my' 
+                    title='Supervised'>
+                  {
+                    typeof jobs === 'object' && 
+                    jobs.content?.length > 0 ? 
+                    jobs.content.map((job, index) => 
+                      <ListGroup.Item 
+                        key={index} 
+                        action
+                        onClick={() => triggerShowModal(job)}>
+                        <JobDetailsLayout {...job}/>
+                      </ListGroup.Item>
+                    ) : <p>
+                      No jobs found, contact Administrator<br/>
+                      if you think this is a mistake
+                    </p>
+                  }
+                  <Paginate
+                    content={jobs}
+                    pageNo={jobTabPage}
+                    setPage={setJobTabPage}
+                    callback={stableAttemptFetching}/>
+                  </Tab>
+                  <Tab eventKey='new' title='New'>
+                  {
+                    typeof newJobs === 'object' && 
+                    newJobs.content?.length > 0 ? 
+                    newJobs.content.map((job, index) => 
+                      <ListGroup.Item 
+                        key={index} 
+                        action
+                        onClick={() => triggerShowModal(job)}>
+                        <JobDetailsLayout {...job}/>
+                      </ListGroup.Item>
+                    ) : <p>
+                      No new jobs found
+                    </p>
+                  }
+                  <Paginate
+                    content={newJobs}
+                    pageNo={newJobTabPage}
+                    setPage={setNewJobTabPage}
+                    callback={stableAttemptFetching}/>
+                  </Tab>
+                </Tabs> :
+                <ListGroup style={{ marginTop: 20 }}>
+                  {
+                    typeof jobs === 'object' && 
+                    jobs.content?.length > 0 ? 
+                    jobs.content.map((job, index) => 
+                      <ListGroup.Item 
+                        key={index} 
+                        action
+                        onClick={() => triggerShowModal(job)}>
+                        <JobDetailsLayout {...job}/>
+                      </ListGroup.Item>
+                    ) : <p>
+                      No jobs found, contact Administrator<br/>
+                      if you think this is a mistake
+                    </p>
+                  }
+                  <Paginate
+                    content={jobs}
+                    pageNo={jobTabPage}
+                    setPage={setJobTabPage}
+                    callback={stableAttemptFetching}/>
+                </ListGroup>
+              }
             </div>
           </Card.Body>
         </Container> :
@@ -144,93 +226,17 @@ const JobDetailsLayout = (props) => {
       Booked on {new Date(props.bookingDate).toDateString()}
     </div>
     {
-      props.status !== 'VERIFIED' || props.status !== 'COMPLETED' ?
+      props.status !== 'VERIFIED' && props.status !== 'COMPLETED' ?
+      props.status === 'BOOKED' ?
+      <div style={{ flex: 2}}>
+        Pending acknowledgement from Supervisor
+      </div> :
       <div style={{ flex: 2 }}>
-        Should be over by {new Date(props.deadlineDate).toDateString()}
+        Should be over by {new Date(props.deadlineDate).toLocaleDateString()}
       </div> :
       <div style={{ flex: 2 }}>
         JobID for reference {props.id}
       </div>
     }
   </Row>
-}
-
-const JobDetailsModal = (props) => {
-  const [loading, setLoading] = React.useState(false);
-  const [technicians, setTechnicians] = React.useState(undefined);
-  const [selectedTech, setSelectedTech] = React.useState('');
-  const [deadline, setDeadline] = React.useState('');
-  const [serviceLog, setServiceLog] = React.useState('');
-
-  const handleSchedule = async () => {
-    
-  }
-
-  const attemptFetch = async () => {
-    setLoading(true);
-    try {
-      let result = await get('/user/all')
-      setTechnicians(result);
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  React.useEffect(() => {
-    if (props.content.status === 'BOOKED' &&
-    (props.user.type === 'admin' || props.user.type === 'supervisor')) {
-      attemptFetch();
-    }
-  }, [props.user.type, props.content.status]);
-
-  return (
-  <Modal show={props.show} onHide={props.handleClose} size='lg'>
-    <Modal.Header closeButton>
-      <Modal.Title style={{ fontFamily: 'Sansita' }}>Job Specifics</Modal.Title>
-    </Modal.Header>
-    <Modal.Body style={{ maxHeight: '25rem', overflow: 'scroll' }}>
-      <Table striped hover responsive>
-        <tbody>
-        {
-          typeof props.content === 'object' ? 
-          Object.keys(props.content).map((key, index) => 
-            key !== 'services' && props.content[key] ? 
-            <tr key={index}>
-              <th>{key}</th>
-              <td>{props.content[key]}</td>
-            </tr> : <></>
-          ) : <></>
-        }
-        </tbody>
-      </Table>
-      <Table striped hover responsive>
-        <tbody>
-        {
-          props.content?.services?.map((service, index) => 
-          <tr style={{ flexDirection: 'row' }} key={index}>
-          {
-            typeof service === 'object' ? 
-            Object.keys(service).map((key, index) => 
-              service[key] ? 
-              <td key={index}>
-                {service[key]}
-              </td> : <></>
-            ) : <></>
-          } 
-          </tr>)
-        }
-        </tbody>
-      </Table>
-    </Modal.Body>
-    <Modal.Footer>
-      <Button onClick={props.handleClose} label='Ok'/>
-      { 
-        props.content?.status === 'BOOKED' && 
-        (props.user?.type === 'admin' || props.user?.type === 'supervisor') ? 
-        <Button onClick={handleSchedule} label='Schedule'/> : <></> 
-      }
-    </Modal.Footer>
-  </Modal>);
 }

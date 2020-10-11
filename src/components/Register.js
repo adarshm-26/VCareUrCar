@@ -4,6 +4,7 @@ import { Header, Alert, Button } from './Components';
 import { useFormik } from 'formik';
 import { useHistory } from 'react-router-dom';
 import * as Yup from 'yup';
+import { post } from '../Utils';
 
 const RegisterSchema = Yup.object().shape({
   name: Yup.string()
@@ -23,6 +24,8 @@ const RegisterSchema = Yup.object().shape({
   password: Yup.string()
     .min(8, 'Too short')
     .required('Required'),
+  cpassword: Yup.string()
+    .oneOf([Yup.ref('password'), null], 'Passwords must match')
 });
 
 export const Register = () => {
@@ -34,25 +37,22 @@ export const Register = () => {
       age: undefined,
       phone: undefined,
       email: '',
-      type:'customer',
       password: '',
-      cpassword: ''
+      cpassword: '',
+      enable:false
     },
     validationSchema: RegisterSchema,
     onSubmit: async (values) => {
       console.log('Registering....');
       try {
         delete (values.cpassword);
-        let response = await fetch('http://localhost:1112/user/register', {
-          method: 'POST',
-          headers: {
-            'content-type': 'application/json',
-          },
-          body: JSON.stringify(values)
-        });
-        let result = await response.json();
-        alert(result);
-        history.push('/profile');
+        await post('/user/register', {
+          ...values,
+          type: 'customer'
+        }, { getResult: false, withAuth: false });
+        localStorage.setItem('usermail',values.email);
+        localStorage.setItem('userpassword',values.password);
+        history.push('/verifymail');
       } catch (e) {
         console.error(e);
         setOnError(e.message);
@@ -76,91 +76,32 @@ export const Register = () => {
         <Card.Title>Register</Card.Title>
         <Card.Subtitle>enter your details</Card.Subtitle>
         <Form onSubmit={formik.handleSubmit}>
-          <Form.Control 
-            style={{ marginTop: 20 }}
-            type='text' 
-            name='name'
-            value={formik.values.name}
-            placeholder='Name'
-            onBlur={formik.handleBlur}
-            onChange={formik.handleChange}/>
-          <div style={{ color: 'red', textAlign: 'start' }}>
-            {
-              formik.touched.name ?
-              formik.errors.name : ''
-            }
-          </div>
-          <Form.Control 
-            style={{ marginTop: 20 }}
-            type='number' 
-            name='age'
-            value={formik.values.age}
-            placeholder='Age'
-            onBlur={formik.handleBlur}
-            onChange={formik.handleChange}/>
-          <div style={{ color: 'red', textAlign: 'start' }}>
-            {
-              formik.touched.age ?
-              formik.errors.age : ''
-            }
-          </div>
-          <Form.Control 
-            style={{ marginTop: 20 }}
-            type='number' 
-            name='phone'
-            value={formik.values.phone}
-            placeholder='Phone'
-            onBlur={formik.handleBlur}
-            onChange={formik.handleChange}/>
-          <div style={{ color: 'red', textAlign: 'start' }}>
-            {
-              formik.touched.phone ?
-              formik.errors.phone : ''
-            }
-          </div>
-          <Form.Control 
-            style={{ marginTop: 20 }}
-            type='text' 
-            name='email'
-            value={formik.values.email}
-            placeholder='Email'
-            onBlur={formik.handleBlur}
-            onChange={formik.handleChange}/>
-          <div style={{ color: 'red', textAlign: 'start' }}>
-            {
-              formik.touched.email ?
-              formik.errors.email : ''
-            }
-          </div>
-          <Form.Control 
-            style={{ marginTop: 20 }}
-            type='password' 
-            name='password'
-            value={formik.values.password}
-            placeholder='Password'
-            onBlur={formik.handleBlur}
-            onChange={formik.handleChange}/>
-          <div style={{ color: 'red', textAlign: 'start' }}>
-            {
-              formik.touched.password ?
-              formik.errors.password : ''
-            }
-          </div>
-          <Form.Control 
-            style={{ marginTop: 20 }}
-            type='password' 
-            name='cpassword'
-            value={formik.values.cpassword}
-            placeholder='Confirm Password'
-            onBlur={formik.handleBlur}
-            onChange={formik.handleChange}/>
-          <div style={{ color: 'red', textAlign: 'start' }}>
-            {
-              formik.touched.cpassword && 
-              formik.values.password !== formik.values.cpassword ?
-              'Passwords dont match' : ''
-            }
-          </div>
+        {
+          [{ place: 'Name',            name: 'name',      type: 'text' },
+          { place: 'Age',              name: 'age',       type: 'number' },
+          { place: 'Phone',            name: 'phone',     type: 'number' },
+          { place: 'Email',            name: 'email',     type: 'text' },
+          { place: 'Password',         name: 'password',  type: 'password' },
+          { place: 'Confirm Password', name: 'cpassword', type: 'password' }]
+          .map((value, index) => {
+            return (<>
+              <Form.Control style={{ marginTop: 20 }}
+                type={value.type}
+                name={value.name}
+                value={formik.values[value.name]}
+                placeholder={value.place}
+                onBlur={formik.handleBlur}
+                onChange={formik.handleChange}
+              />
+              <div style={{ color: 'red', textAlign: 'start' }}>
+              {
+                formik.touched[value.name] ?
+                formik.errors[value.name] : ''
+              }
+              </div>
+            </>);
+          })
+        }
           <Button 
             style={{ marginTop: '15px' }}
             type='submit'
