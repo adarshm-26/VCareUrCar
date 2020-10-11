@@ -27,7 +27,9 @@ export const Verify = (props) => {
     }
   }
 
-  const stableFetching = React.useCallback(attemptFetching, []);
+  const stableFetching = React.useCallback(attemptFetching, 
+    [props.location.state.job.carId,
+    props.location.state.job.technicianId]);
 
   React.useEffect(() => {
     stableFetching();
@@ -41,7 +43,8 @@ export const Verify = (props) => {
       height: '100%', 
       justifyContent: 'center', 
       alignItems: 'center',
-      background: 'white'
+      background: 'white',
+      overflow: 'auto'
     }}>
       {
         loading ?
@@ -76,7 +79,7 @@ export const Verify = (props) => {
                   </tr>)}
                   <tr>
                     <th>Booking Date</th>
-                    <td>{new Date(props.location.state.job.bookingDate).toDateString()}</td>
+                    <td>{new Date(props.location.state.job.bookingDate).toLocaleDateString()}</td>
                   </tr>
                   <tr>
                     <th>Car</th>
@@ -84,7 +87,7 @@ export const Verify = (props) => {
                   </tr>
                   <tr>
                     <th>Deadline Date</th>
-                    <td>{new Date(props.location.state.job.deadlineDate).toDateString()}</td>
+                    <td>{new Date(props.location.state.job.deadlineDate).toLocaleDateString()}</td>
                   </tr>
                   <tr>
                     <th>Technician</th>
@@ -112,6 +115,7 @@ export const Verify = (props) => {
                       type='checkbox'
                       name={index}
                       label='Verify'
+                      disabled={service.verifiedDate !== null || service.completedDate === null}
                       onChange={(e) => {
                         let services = [...verifiedServices];
                         console.log(e.target.value);
@@ -126,6 +130,7 @@ export const Verify = (props) => {
               </ListGroup>
             </div>
             <Button
+              style={{ marginTop: 20 }}
               label='Submit'
               onClick={async () => {
                 try {

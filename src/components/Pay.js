@@ -1,15 +1,59 @@
 import React from 'react';
 import { Header, Alert, Button, refreshIcon } from './Components';
-import { Spinner, Card, Container, Row, Table, Form, ListGroup } from 'react-bootstrap';
+import { Spinner, Card, Container, Row, Table, ListGroup } from 'react-bootstrap';
 import { get, post } from '../Utils';
 import { useHistory } from 'react-router-dom';
 
-export const Schedule = (props) => {
+const addRazorpay = async (paymentDetails) => {
+  const script = document.createElement('script');
+  script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+  const options = {
+    key: "rzp_test_qO4Lpyz964OqSr",
+    amount: paymentDetails.amount,
+    currency: "INR",
+    name: "VCareUrCar",
+    description: "Test Transaction",
+    order_id: paymentDetails.order_id,
+    handler: async response => {
+      try {
+        let verificationResult = await post('/jobs/pay/verify', {
+          receipt: paymentDetails.receipt,
+          ...response
+        });
+        if (verificationResult === true) {
+          alert('Payment successfully verified');
+        } else {
+          alert('Payment could not be verified');
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    },
+    prefill: {
+      name: paymentDetails.name,
+      email: paymentDetails.email,
+      contact: paymentDetails.phone
+    },
+    notes: {
+      address: "Razorpay Corporate Office"
+    },
+    theme: {
+      color: "#D9F8FF"
+    }
+  };
+  script.onload = () => {
+    const razorpay = new window.Razorpay(options);
+    razorpay.open();
+  };
+  script.onerror = () => {
+    console.log('error loading script');
+  };
+  document.body.appendChild(script);
+}
+
+export const Pay = (props) => {
   const [loading, setLoading] = React.useState(false);
-  const [technicians, setTechnicians] = React.useState(undefined);
   const [car, setCar] = React.useState(undefined);
-  const [selectedTech, setSelectedTech] = React.useState('');
-  const [deadline, setDeadline] = React.useState(new Date().toISOString().split('T')[0]);
   const [onError, setOnError] = React.useState('');
   const history = useHistory();
 
@@ -18,10 +62,6 @@ export const Schedule = (props) => {
     try {
       let carRes = await get(`/cars/${props.location.state.job.carId}`);
       setCar(carRes);
-      let techRes = await get('/user/all?type=technician');
-      setTechnicians(techRes?.content);
-      if (techRes.content.length > 0)
-        setSelectedTech(0);
     } catch (e) {
       console.error(e);
       setOnError(e.message);
@@ -30,7 +70,9 @@ export const Schedule = (props) => {
     }
   }
 
-  const stableFetching = React.useCallback(attemptFetching, []);
+  const stableFetching = React.useCallback(attemptFetching, 
+    [props.location.state.job.carId,
+      props.location.state.job.technicianId]);
 
   React.useEffect(() => {
     stableFetching();
@@ -56,7 +98,7 @@ export const Schedule = (props) => {
           <span className="sr-only">Loading...</span>
         </Spinner> :
         props.location?.state?.job ?
-        technicians && car ?
+        car ?
         <Container style={{
           width: '100%',
           height: '100%',
@@ -69,7 +111,7 @@ export const Schedule = (props) => {
                   flex: 1,
                   textAlign: 'start',
                   textDecoration: 'underline'
-                }}>Schedule Job</h1>
+                }}>Pay Job</h1>
               </Row>
               <Table borderless>
                 <tbody>
@@ -80,7 +122,7 @@ export const Schedule = (props) => {
                   </tr>)}
                   <tr>
                     <th>Booking Date</th>
-                    <td>{new Date(props.location.state.job.bookingDate).toDateString()}</td>
+                    <td>{new Date(props.location.state.job.bookingDate).toLocaleDateString()}</td>
                   </tr>
                   <tr>
                     <th>Car</th>
@@ -88,67 +130,59 @@ export const Schedule = (props) => {
                   </tr>
                   <tr>
                     <th>Deadline Date</th>
-                    <td>
-                      <Form.Control
-                        name='deadlineDate'
-                        type='date'
-                        value={deadline}
-                        onChange={(e) => {
-                          console.log(e.target.value);
-                          console.log(new Date(e.target.value).toISOString().split('T')[0]);
-                          setDeadline(e.target.value);
-                        }}/>
-                    </td>
+                    <td>{new Date(props.location.state.job.deadlineDate).toLocaleDateString()}</td>
                   </tr>
                   <tr>
                     <th>Technician</th>
-                    <td>
-                      <Form.Control
-                        as='select'
-                        name='technician'
-                        value={selectedTech}
-                        onChange={(e) => {
-                          e.preventDefault();
-                          setSelectedTech(e.target.value);
-                        }}>
-                      {
-                        typeof technicians === 'object' &&
-                        technicians.length > 0 ?
-                        technicians.map((tech, index) => 
-                          <option value={index}>
-                            {tech.name}
-                          </option>
-                        ) :
-                        <option>No technician found</option>
-                      }
-                      </Form.Control>
-                    </td>
+                    <td>{props.location.state.job.technicianId}</td>
                   </tr>
                 </tbody>
               </Table>
               <h4>Services : </h4>
-              <ListGroup style={{ textAlign: 'start' }}>
+              <ListGroup  style={{ textAlign: 'start' }}>
               {
                 props.location.state.job?.services?.map((service, index) => 
                 <ListGroup.Item key={index}>
-                  <p>{service.name}</p>
+                  <Row>
+                    <p>{service.name}</p>
+                    <div>Worked On : {service.work}</div>
+                    <div>Cost : {service.cost}</div>
+                    <div>
+                      Completed On : 
+                      {new Date(service.completedDate).toLocaleDateString()}
+                    </div>
+                    <div>
+                      Verified On :
+                      {new Date(service.verifiedDate).toLocaleDateString()}
+                    </div>
+                  </Row>
                 </ListGroup.Item>)
               }
               </ListGroup>
             </div>
             <Button
               style={{ marginTop: 20 }}
-              label='Submit'
+              label='Start Payment'
               onClick={async () => {
                 try {
-                  console.log(selectedTech + " " + deadline);
-                  let body = props.location.state.job;
-                  body.deadlineDate = new Date(deadline).getTime();
-                  body.technicianId = technicians[selectedTech].id;
-                  body.acceptedDate = new Date().getTime();
-                  body.supervisorId = props.location.state.user?.id;
-                  body.status = "SCHEDULED";
-                  await post('/jobs/schedule', body, { getResult: false });
+                  let total = 0;
+                  props.location.state.job.services.forEach(service => {
+                    total += (+service.cost * 100);
+                  });
+                  let body = {
+                    amount: total,
+                    currency: 'INR',
+                    receipt: props.location.state.job.id
+                  }
+                  let result = await post('/jobs/pay/initiate', body);
+                  await addRazorpay({
+                    name: props.location.state.user.name,
+                    email: props.location.state.user.email,
+                    phone: props.location.state.user.phone,
+                    amount: total,
+                    order_id: result.orderId,
+                    receipt: props.location.state.job.id
+                  });
                 } catch (e) {
                   console.error(e);
                   setOnError(e.message);

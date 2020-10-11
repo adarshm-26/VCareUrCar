@@ -46,11 +46,10 @@ export const Register = () => {
       console.log('Registering....');
       try {
         delete (values.cpassword);
-        let result = await post('/user/register', {
+        await post('/user/register', {
           ...values,
           type: 'customer'
         }, { getResult: false, withAuth: false });
-        alert(result);
         localStorage.setItem('usermail',values.email);
         localStorage.setItem('userpassword',values.password);
         history.push('/verifymail');

@@ -15,8 +15,7 @@ export const Header = (props) => {
   fixed='top' 
   expand='lg' 
   style={{ 
-    backgroundColor: props.backgroundColor ?
-    props.backgroundColor : '#d9f8ff' 
+    backgroundColor: props.backgroundColor || '#d9f8ff' 
   }}>
   <Navbar.Brand href='/' style={{ 
     fontSize: '2rem', 
