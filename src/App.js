@@ -1,19 +1,21 @@
-import React,{ useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { 
-  Home, 
-  PrivateRoute, 
-  Login, 
-  Register, 
-  Profile, 
-  Jobs, 
-  Cars, 
+import {
+  Home,
+  PrivateRoute,
+  Login,
+  Register,
+  Profile,
+  Jobs,
+  Cars,
   Schedule,
   Verify,
-  LogService, 
-  Pay } from './components/Components';
+  LogService,
+  Pay,
+  CheckMailVerification
+} from './components/Components';
 import { AuthContext } from './context/auth';
 
 const App = () => {
@@ -51,6 +53,7 @@ const App = () => {
             <PrivateRoute path='/logService' component={LogService}/>
             <PrivateRoute path='/pay' component={Pay}/>
             {/* <Route path='/services' component={Services}/>*/}
+            <Route path='/verifymail' component={CheckMailVerification} />
           </Switch>
         </Router>
       </div>

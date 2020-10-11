@@ -38,7 +38,8 @@ export const Register = () => {
       phone: undefined,
       email: '',
       password: '',
-      cpassword: ''
+      cpassword: '',
+      enable:false
     },
     validationSchema: RegisterSchema,
     onSubmit: async (values) => {
@@ -49,7 +50,9 @@ export const Register = () => {
           ...values,
           type: 'customer'
         }, { getResult: false, withAuth: false });
-        history.push('/profile');
+        localStorage.setItem('usermail',values.email);
+        localStorage.setItem('userpassword',values.password);
+        history.push('/verifymail');
       } catch (e) {
         console.error(e);
         setOnError(e.message);
