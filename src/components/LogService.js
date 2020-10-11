@@ -1,5 +1,5 @@
 import React from 'react';
-import { Header, Alert, Button, refreshIcon } from './Components';
+import { Header, Alert, Button, refreshIcon, ConfirmModal } from './Components';
 import { Spinner, Card, Container, Row, Table, Form, ListGroup, Col } from 'react-bootstrap';
 import { get, post } from '../Utils';
 import { useHistory } from 'react-router-dom';
@@ -9,7 +9,12 @@ export const LogService = (props) => {
   const [car, setCar] = React.useState(undefined);
   const [servicedServices, setServicedServices] = React.useState(props.location?.state?.job.services);
   const [onError, setOnError] = React.useState('');
+  const [showConfirmModal, setShowConfirmModal] = React.useState(false);
+  const [confirmModalContent, setConfirmModalContent] = React.useState('');
+  const [confirmModalAction, setConfirmModalAction] = React.useState('');
   const history = useHistory();
+
+  const handleClose = () => setShowConfirmModal(false);
 
   const attemptFetching = async () => {
     setLoading(true);
@@ -38,7 +43,8 @@ export const LogService = (props) => {
       height: '100%', 
       justifyContent: 'center', 
       alignItems: 'center',
-      background: 'white'
+      background: 'white',
+      overflow: 'auto'
     }}>
       {
         loading ?
@@ -53,9 +59,9 @@ export const LogService = (props) => {
         <Container style={{
           width: '100%',
           height: '100%',
-          padding: '120px',
+          padding: '120px'
         }}>
-          <Card.Body>
+          <Card.Body >
             <div>
               <Row style={{ alignItems: 'center' }}>
                 <h1 style={{
@@ -135,24 +141,46 @@ export const LogService = (props) => {
               </ListGroup>
             </div>
             <Button
+              style={{ marginTop: 20 }}
               label='Submit'
-              onClick={async () => {
-                try {
-                  let body = props.location.state.job;
-                  body.services = servicedServices;
-                  let todayDate = new Date().getTime();
-                  for (let key in servicedServices) {
-                    body.services[key].completedDate = todayDate;
+              onClick={() => {
+                const action = async () => {
+                  try {
+                    let body = props.location.state.job;
+                    body.services = servicedServices;
+                    let todayDate = new Date().getTime();
+                    for (let key in servicedServices) {
+                      if (servicedServices.work !== '')
+                        body.services[key].completedDate = todayDate;
+                    }
+                    body.appointedDate = todayDate;
+                    await post('/jobs/service', body, { getResult: false });
+                  } catch (e) {
+                    console.error(e);
+                    setOnError(e.message);
+                  } finally {
+                    history.push('/jobs');
                   }
-                  body.appointedDate = todayDate;
-                  await post('/jobs/service', body, { getResult: false });
-                } catch (e) {
-                  console.error(e);
-                  setOnError(e.message);
-                } finally {
-                  history.push('/jobs');
                 }
+                const content = {};
+                for (let key in servicedServices) {
+                  if (props.location.state.job.services[key].work !==
+                    servicedServices[key].work) {
+                    content[key] = servicedServices[key];
+                  }
+                }
+                setConfirmModalAction({
+                  label: 'Log Services',
+                  onClick: action
+                });
+                setConfirmModalContent(content);
+                setShowConfirmModal(true);
               }}/>
+              <ConfirmModal
+                show={showConfirmModal}
+                content={confirmModalContent}
+                action={confirmModalAction}
+                handleClose={handleClose}/>
           </Card.Body>
         </Container> :
         <div 

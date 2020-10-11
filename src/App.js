@@ -12,7 +12,8 @@ import {
   Cars, 
   Schedule,
   Verify,
-  LogService } from './components/Components';
+  LogService, 
+  Pay } from './components/Components';
 import { AuthContext } from './context/auth';
 
 const App = () => {
@@ -48,6 +49,7 @@ const App = () => {
             <PrivateRoute path='/schedule' component={Schedule}/>
             <PrivateRoute path='/verify' component={Verify}/>
             <PrivateRoute path='/logService' component={LogService}/>
+            <PrivateRoute path='/pay' component={Pay}/>
             {/* <Route path='/services' component={Services}/>*/}
           </Switch>
         </Router>

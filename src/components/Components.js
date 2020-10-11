@@ -10,9 +10,12 @@ export { Cars } from './Cars'
 export { StyledAlert as Alert } from './Alert';
 export { StyledButton as Button } from './Button';
 export { BookingModal } from './BookingModal';
+export { JobDetailsModal } from './JobDetailsModal';
 export { Schedule } from './Schedule';
 export { Verify } from './Verify';
 export { LogService } from './LogService';
+export { Pay } from './Pay';
+export { ConfirmModal } from './ConfirmModal';
 export const refreshIcon = <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M7.5 14.5C3.63401 14.5 0.5 11.366 0.5 7.5C0.5 5.26904 1.54367 3.28183 3.1694 2M7.5 0.5C11.366 0.5 14.5 3.63401 14.5 7.5C14.5 9.73096 13.4563 11.7182 11.8306 13M11.5 10V13.5H15M0 1.5H3.5V5" stroke="black"/>
 </svg>;

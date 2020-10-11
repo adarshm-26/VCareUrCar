@@ -145,7 +145,7 @@ export const Profile = () => {
                 </Row>
                 <Row style={{ padding: '10px' }}>
                   <h5 className='text-box-profile'>Member since</h5>
-                  <h5 className='text-box-profile-values'>{user.registeredOn}</h5>
+                  <h5 className='text-box-profile-values'>{new Date(user.registerDate).toLocaleDateString()}</h5>
                 </Row>
               </Col>
             </Row>
@@ -182,7 +182,11 @@ const UpdatePasswordModal = (props) => {
   }
 
   return (
-    <Modal show={props.show} size='sm' onHide={props.handleClose}>
+    <Modal 
+      centered
+      show={props.show} 
+      size='sm' 
+      onHide={props.handleClose}>
       <Modal.Header closeButton>
         <Modal.Title>Enter new password</Modal.Title>
       </Modal.Header>
