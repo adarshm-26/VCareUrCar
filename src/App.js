@@ -46,14 +46,14 @@ const App = () => {
             <Route path='/login' component={Login}/>
             <Route path='/register' component={Register}/>
             <PrivateRoute path='/profile' component={Profile}/>
-            <PrivateRoute path='/jobs' component={Jobs}/>
-            <PrivateRoute path='/cars' component={Cars}/>
+            <Route path='/jobs' component={Jobs}/>
+            <Route path='/cars' component={Cars}/>
             <PrivateRoute path='/schedule' component={Schedule}/>
             <PrivateRoute path='/verify' component={Verify}/>
             <PrivateRoute path='/logService' component={LogService}/>
             <PrivateRoute path='/pay' component={Pay}/>
             {/* <Route path='/services' component={Services}/>*/}
-            <Route path='/verifymail' component={CheckMailVerification} />
+            <PrivateRoute path='/verifymail' component={CheckMailVerification} />
           </Switch>
         </Router>
       </div>
