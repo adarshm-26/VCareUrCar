@@ -46,3 +46,72 @@ html, body, #root, #root>div {
   background-color: #ffffff !important;
   font-family: 'Sansita';
 }
+
+.bgCar1 {
+  background: url(./images/car1.png) no-repeat center center fixed;
+  background-size: cover;
+  height: 100vh;
+}
+
+.bgCar2 {
+  background: url(./images/car2.jpg) no-repeat center center fixed;
+  background-size: cover;
+  height: 100vh
+}
+
+.bgCar3 {
+  background: url(./images/car3.jpg) no-repeat center center fixed;
+  background-size: cover;
+  height: 100vh
+}
+
+.jumboText {
+  display: flex;
+  height: 100vh;
+  justify-content: center;
+  align-items: center;
+  color: #d9f8ff;
+  font-size: 4rem;
+  background: #00000022;
+  text-shadow: 0 0 0.3rem #000000;
+}
+
+.frontCardAssured {
+  border-color: #d9f8ff;
+  border-radius: 2rem !important;
+  overflow: hidden;
+}
+
+.frontCard:hover,
+.frontCard:focus {
+  transition: all .5s;
+  transform: scale(1.05);
+}
+
+.frontText {
+  display: flex;
+  font-style: normal;
+  font-weight: normal;
+  font-size: 2rem;
+  padding: 3rem;
+  align-items: center;
+  text-align: center;
+  color: #000000;
+  text-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+}
+
+.anchor {
+  color: #d9f8ff !important;
+}
+
+.anchor:hover {
+  color: #ffffff !important;
+}
+
+.raised-card {
+  box-shadow: 0 0.6em 1em 0.35em rgba(0,0,0,0.27),
+  0 0.6em 2em 0.3em rgba(255,255,255,0.15),
+  0 0 0em 0.05em rgba(255,255,255,0.12);
+  border-radius: 1rem !important;
+  margin: 1.5rem;
+}

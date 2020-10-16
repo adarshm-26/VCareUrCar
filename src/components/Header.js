@@ -1,5 +1,6 @@
 import React from 'react';
 import { Nav, Navbar } from 'react-bootstrap';
+import { get } from '../Utils';
 import { useAuth } from '../context/auth';
 
 const icon = <svg width="1em" height="1em" viewBox="0 0 16 16" className="bi bi-person-circle" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
@@ -10,6 +11,30 @@ const icon = <svg width="1em" height="1em" viewBox="0 0 16 16" className="bi bi-
 
 export const Header = (props) => {
   const { signOut } = useAuth();
+  const [token, setToken] = React.useState(localStorage.getItem('token'));
+  const [isCustomer, setCustomer] = React.useState(false);
+  const [isAdmin, setAdmin] = React.useState(false);
+  const [isValid, setValid] = React.useState(false);
+
+  React.useEffect(() => {
+    const checkIfCustomer = async () => {
+      if (token !== null) {
+        try {
+          const result = await get('/user/me');
+          if (result.type === 'customer') {
+            setCustomer(true);
+          } else if (result.type === 'admin') {
+            setAdmin(true);
+          }
+          if (result.id !== undefined)
+            setValid(true);
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    }
+    checkIfCustomer();
+  }, [token]);
 
   return <Navbar 
   fixed='top' 
@@ -26,12 +51,21 @@ export const Header = (props) => {
   <Navbar.Collapse id="basic-navbar-nav">
     <Nav style={{ marginLeft: 'auto' }}>
       <Nav.Link href='/' style={{ color: props.fontColor }}>Home</Nav.Link>
-      <Nav.Link href="#link" style={{ color: props.fontColor }}>Services</Nav.Link>
+      <Nav.Link href='/services' style={{ color: props.fontColor }}>Services</Nav.Link>
       {
-        localStorage.getItem('token') !== null ?
+        isValid ?
         <>
           <Nav.Link href='/jobs' style={{ color: props.fontColor }}>My Jobs</Nav.Link>
-          <Nav.Link href='/cars' style={{ color: props.fontColor }}>My Cars</Nav.Link>
+          { 
+            isCustomer || isAdmin ?
+            <Nav.Link href='/cars' style={{ color: props.fontColor }}>My Cars</Nav.Link>
+            : <></> 
+          }
+          {
+            isAdmin ?
+            <Nav.Link href='/reports' style={{ color: props.fontColor }}>Reports</Nav.Link>
+            : <></>
+          }
           <Nav.Link href='/profile' style={{ color: props.fontColor }}>{icon}</Nav.Link>
           <Nav.Link onClick={signOut} style={{ color: props.fontColor }}>Sign Out</Nav.Link>
         </> :
