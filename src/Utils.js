@@ -38,21 +38,24 @@ export const post = async (url, body, { getResult = true, withAuth = true } = {}
 /**
  * @description Utility method for GET requests,
  * handle errors in caller function
- * @param {string} url 
+ * @param {string} url
+ * @param {string} type 
  */
-export const get = async (url) => {
+export const get = async (url, type = 'json') => {
   let token = localStorage.getItem('token');
   let response = await fetch(`${SERVER_HOSTNAME}:${SERVER_PORT}${url}`, {
     method: 'GET',
     headers: {
       'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json',
+      'Content-Type': `application/${type}`,
     },
     cache: 'no-cache'
   });
-  if (response.ok) {
+  if (response.ok && type === 'json') {
     let result = await response.json();
     return result;
+  } else if (response.ok && type !== 'json') {
+    return response;
   } else {
     throw new Error('GET error: ' + response.status);
   }

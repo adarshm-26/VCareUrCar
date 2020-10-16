@@ -14,7 +14,13 @@ import {
   Verify,
   LogService,
   Pay,
-  CheckMailVerification
+  CheckMailVerification,
+  Reports,
+  Contact,
+  Terms,
+  About,
+  Privacy,
+  ServicePage
 } from './components/Components';
 import { AuthContext } from './context/auth';
 
@@ -45,14 +51,19 @@ const App = () => {
             <Route exact path='/' component={Home}/>
             <Route path='/login' component={Login}/>
             <Route path='/register' component={Register}/>
+            <Route path='/contact' component={Contact}/>
+            <Route path='/terms' component={Terms}/>
+            <Route path='/about' component={About}/>
+            <Route path='/privacyPolicy' component={Privacy}/>
+            <Route path='/services' component={ServicePage}/>
             <PrivateRoute path='/profile' component={Profile}/>
-            <Route path='/jobs' component={Jobs}/>
-            <Route path='/cars' component={Cars}/>
+            <PrivateRoute path='/jobs' component={Jobs}/>
+            <PrivateRoute path='/cars' component={Cars}/>
             <PrivateRoute path='/schedule' component={Schedule}/>
             <PrivateRoute path='/verify' component={Verify}/>
             <PrivateRoute path='/logService' component={LogService}/>
             <PrivateRoute path='/pay' component={Pay}/>
-            {/* <Route path='/services' component={Services}/>*/}
+            <PrivateRoute path='/reports' component={Reports}/>
             <PrivateRoute path='/verifymail' component={CheckMailVerification} />
           </Switch>
         </Router>
