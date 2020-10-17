@@ -71,7 +71,7 @@ export const Schedule = (props) => {
                   textDecoration: 'underline'
                 }}>Schedule Job</h1>
               </Row>
-              <Table borderless>
+              <Table borderless style={{ textAlign: 'end' }}>
                 <tbody>
                   {['id', 'status'].map((key, index) =>
                   <tr>

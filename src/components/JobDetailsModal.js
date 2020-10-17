@@ -144,16 +144,21 @@ export const JobDetailsModal = (props) => {
           { name: 'Car', value: props.content.carId },
           { name: 'Customer', value: props.content.customerId },
           { name: 'STATUS', value: props.content.status },
-          { name: 'Booked On', value: new Date(props.content.bookingDate).toLocaleDateString() },
-          { name: 'Accepted On', value: new Date(props.content.acceptedDate).toLocaleDateString() },
-          { name: 'Servicing started', value: new Date(props.content.appointedDate).toLocaleDateString() },
-          { name: 'Deadline', value: new Date(props.content.deadlineDate).toLocaleDateString() },
+          { name: 'Booked On', value: props.content.bookingDate ? 
+            new Date(props.content.bookingDate).toLocaleDateString() : undefined },
+          { name: 'Accepted On', value: props.content.acceptedDate ? 
+          new Date(props.content.acceptedDate).toLocaleDateString() : undefined },
+          { name: 'Servicing started', value: props.content.appointedDate ? 
+          new Date(props.content.appointedDate).toLocaleDateString() : undefined },
+          { name: 'Deadline', value: props.content.deadlineDate ? 
+          new Date(props.content.deadlineDate).toLocaleDateString() : undefined },
           { name: 'Supervisor', value: props.content.supervisorId },
           { name: 'Technician', value: props.content.technicianId }].map((key, index) => 
+            key.value ?
             <tr key={index}>
               <th>{key.name}</th>
               <td>{key.value}</td>
-            </tr>
+            </tr> : <></>
           ) : <></>
         }
         </tbody>
@@ -162,7 +167,7 @@ export const JobDetailsModal = (props) => {
       <Table hover borderless>
         <thead>
           <tr>
-            {['Service', 'Cost', 'Completed On', 'Verfied On'].map((key, index) => 
+            {['Service', 'Cost', 'Completed On', 'Verified On'].map((key, index) => 
               <th>{key}</th>
             )} 
           </tr>
@@ -177,7 +182,7 @@ export const JobDetailsModal = (props) => {
               <td>{service[key]}</td> : <></>
             )}
           {['completedDate', 'verifiedDate'].map((key, index) => 
-              service[key] ? 
+              service[key] !== null ? 
               <td>{new Date(service[key]).toLocaleDateString()}</td> : <></>
             )}
           </tr>) : <></>
