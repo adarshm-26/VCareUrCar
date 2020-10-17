@@ -75,7 +75,7 @@ export const LogService = (props) => {
                   textDecoration: 'underline'
                 }}>Service Job</h1>
               </Row>
-              <Table borderless>
+              <Table borderless style={{ textAlign: 'end' }}>
                 <tbody>
                   {['id', 'status'].map((key, index) =>
                   <tr key={index}>
@@ -153,12 +153,13 @@ export const LogService = (props) => {
                 const action = async () => {
                   try {
                     let body = props.location.state.job;
-                    body.services = servicedServices;
                     let todayDate = new Date().getTime();
-                    for (let key in servicedServices) {
-                      if (servicedServices.work !== '')
-                        body.services[key].completedDate = todayDate;
-                    }
+                    servicedServices.forEach((service, index) => {
+                      if (body.services[index].cost !== service.cost) {
+                        body.services[index] = service;
+                        body.services[index].completedDate = todayDate;
+                      }
+                    });
                     body.appointedDate = todayDate;
                     await post('/jobs/service', body, { getResult: false });
                   } catch (e) {

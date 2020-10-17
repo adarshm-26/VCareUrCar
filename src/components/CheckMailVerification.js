@@ -35,6 +35,7 @@ export const CheckMailVerification = () => {
             await post('/user/sendmail', {
                 email: localStorage.getItem('usermail')
             }, { getResult: false });
+
         }
         catch (e) {
             console.error(e);
@@ -53,7 +54,7 @@ export const CheckMailVerification = () => {
 
     return (<><Header /><div style={{
         display: 'flex',
-        height: '50%',
+        height: '100%',
         justifyContent: 'center',
         alignItems: 'center'
     }}>
@@ -119,7 +120,7 @@ export const CheckMailVerification = () => {
                             finally {
                                 setLoading(false);
                             }
-                        }}> <p>click to resend</p></div>
+                        }}> <a href='#'>click to resend</a></div>
                         <Alert onError={onError} setOnError={setOnError} />
 
                     </Card> : <div

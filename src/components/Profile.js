@@ -49,7 +49,7 @@ export const Profile = () => {
     try {
       let user = await get('/user/me');
       setUser(user);
-      if(user.enable===false){
+      if(user.enable === false){
         history.push('/verifymail');
       }
     } catch(e) {
@@ -60,9 +60,11 @@ export const Profile = () => {
     }
   }
 
+  const stableAttemptFetching = React.useCallback(attemptFetching, []);
+
   React.useEffect(() => {
-    attemptFetching();
-  }, []);
+    stableAttemptFetching();
+  }, [stableAttemptFetching]);
 
   return (<>
     <Header/>
@@ -168,21 +170,29 @@ export const Profile = () => {
 
 const UpdatePasswordModal = (props) => {
   const [password, setPassword] = React.useState('');
+  const [result, setResult] = React.useState(undefined);
   const [valid, setValid] = React.useState('');
 
   const updatePassword = async () => {
-    if (password.length < 8) {
+    if (password.trim().length < 8) {
       setValid('Too short');
       return;
     }
     try {
-      let result = await post('/user/updatePassword', {
+      await post('/user/updatePassword', {
         id: props.user.id,
         password: password
-      });
-      console.log(result);
+      }, { getResult: false });
+      setResult(true);
     } catch (e) {
       console.error(e);
+      setResult(false);
+    } finally {
+      setTimeout(() => {
+        props.handleClose();
+        setResult(undefined);
+        setPassword('');
+      }, 1000);
     }
   }
 
@@ -193,7 +203,13 @@ const UpdatePasswordModal = (props) => {
       size='sm' 
       onHide={props.handleClose}>
       <Modal.Header closeButton>
-        <Modal.Title>Enter new password</Modal.Title>
+        <Modal.Title>
+          {
+            result === true ?
+            'Updated' : result === false ?
+            'Some error occurred' : 'Update Password'
+          }
+        </Modal.Title>
       </Modal.Header>
       <Modal.Body>
         <Form>
