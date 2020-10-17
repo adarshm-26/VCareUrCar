@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import { Form, Modal, Spinner } from 'react-bootstrap';
+import { Form, Spinner } from 'react-bootstrap';
 import { Alert, Button } from './Components';
 import { useHistory } from 'react-router-dom';
 import { useFormik } from 'formik';
 import * as car from '../cardata/CarsList';
 import * as Yup from "yup";
-import { get ,post} from '../Utils.js';
-
+import { get, post } from '../Utils.js';
+import { Component } from 'react';
 
 
 const refreshIcon = <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -18,46 +18,86 @@ const RegisterSchema = Yup.object().shape({
   model: Yup.string().required(),
   brand: Yup.string().required()
 });
-export const AddCar = (props) => {
-  const [state, setState] = useState('');
-  const [model, setModel] = useState('');
-  console.log(state);
-  console.log(model);
+export const AddCar = () => {
+  const [state, setState] = useState({
+    setSelected: ""
+  });
+  const [model, setModel] = useState({
+    setSelectedModel: ""
+  });
+  console.log(state.setSelected);
+  console.log(model.setSelectedModel);
   const [loading, setLoading] = React.useState(false);
   const [onError, setOnError] = useState(undefined);
+  const [setId,setSelectedUser] =useState('');
+  const [users,setUsers] =useState('');
   const history = useHistory();
   const [user, setUser] = useState('');
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    try {
-      
-      await post('/cars/add', {
-        ownerId: user,
-        brand:state,
-        model:model
-      }, { getResult: false });
-      
-      history.replace('/cars');
-    } catch (e) {
-      console.error(e);
+  const token = localStorage.getItem('token');
+  const formik = useFormik({
+    initialValues: {
+      brand: '',
+      model: '',
+      ownerId: ''
+    },
+    validationSchema: RegisterSchema,
+    onSubmit: async (values) => {
+      console.log('adding car');
+      console.log(token);
+      console.log(values);
+      if(users){
+        formik.values.ownerId = setId;
+      }else{
+        formik.values.ownerId = user.id;
+      }
+      try {
+        await post('/cars/add', {
+
+          brand: formik.values.brand,
+          model: formik.values.model,
+          ownerId: formik.values.ownerId
+        }, { getResult: false });
+        window.location.reload();
+        history.replace('/cars');
+      } catch (e) {
+        console.error(e);
+        setOnError(e.message);
+      }
     }
   }
+  );
+  const attemptFetching = async () => {
+    setLoading(true);
+    try {
+      let userRes = await get('/user/me');
+      setUser(userRes);
+      if(userRes.type==='admin'){
+        let usersRes = await get('/user/all');
+        setUsers(usersRes['content'])
+      }
+
+    }
+    catch (e) {
+      console.error(e);
+      setOnError(e.message);
+    }
+    finally {
+      setLoading(false);
+    }
+  }
+
   React.useEffect(() => {
-    if (props.user.type !== 'supervisor')
-      setUser(props.user.id);
-  }, [props.show, props.user]);
- 
-  
-  return (<Modal show={props.show} 
-    size='lg' 
-    onHide={props.handleClose}
-    centered>
-    <Modal.Header closeButton>
-      <Modal.Title style={{ fontFamily: 'Sansita' }}>
-        Add Car Details
-      </Modal.Title>
-    </Modal.Header>
-    <Modal.Body>
+    attemptFetching();
+  }, []);
+
+
+  if (state.setSelected !== "other" && state.setSelected !== '') {
+    formik.values.brand = state.setSelected;
+  }
+  if (model.setSelectedModel !== '' && model.setSelectedModel !== "other") {
+    formik.values.model = model.setSelectedModel;
+  }
+  return (<>
     <div>
       {
 
@@ -68,14 +108,23 @@ export const AddCar = (props) => {
             style={{ margin: '10%' }}>
             <span className="sr-only">Loading...</span>
           </Spinner> :
-          user ?
+          user.type==='customer' || (user.type==='admin' && users) ?
           
-            <Form >
+            <Form onSubmit={formik.handleSubmit}>
+            {
+              user.type==='admin'  ?
+              <Form.Control as="select" style={{ marginTop: 20 }} name='userId' onChange={(e)=>{setSelectedUser(e.target.value)}}>
+              <option value="">select user to add car</option>
+              {users.map((props) => {
+                  return <option value={props.id}>{props.email}</option>;
+                })}
+              </Form.Control>:<></>
+            }
               <Form.Control as="select"
                 style={{ marginTop: 20 }}
                 name='model'
                 onChange={(e) => {
-                  setState( e.target.value );
+                  setState({ setSelected: e.target.value });
                 }}>
                 <option value="">select car brand</option>
                 {car.groupedOptions.map((props) => {
@@ -83,23 +132,30 @@ export const AddCar = (props) => {
                 })}
                 <option value="other">other</option>
               </Form.Control>
-              
-              {renderSecondSelect(state)}
-              {renderIfOtherModel(model)}
+              <div style={{ color: 'red', textAlign: 'start' }}>
+                {
+                  formik.touched.brand &&
+                    formik.values.brand === "" ? 'please select brand name ' : ''
+                }
+              </div>
+              {renderSecondSelect(state.setSelected)}
+              {renderIfOtherModel(model.setSelectedModel)}
+
+              <Button style={{ marginTop: '15px' }} type="submit" label='Submit' />
             </Form>
-            :<></>
+
+            : <div
+              onClick={attemptFetching}
+              style={{ fontSize: 20, cursor: 'pointer' }}>
+              <div>{refreshIcon}</div>
+              <div>Click to retry</div>
+            </div>
+
       }
     </div>
     <Alert onError={onError} setOnError={setOnError} />
-    </Modal.Body>
-    <Modal.Footer>
-          <Button onClick={props.handleClose} label='Close'/>
-          <Button onClick={handleSubmit} label='Book'/>
-    </Modal.Footer>
-    
-  </Modal>
+  </>
   );
-
   function renderSecondSelect(selected) {
 
     if (!selected) {
@@ -111,7 +167,10 @@ export const AddCar = (props) => {
           <option value="">select brand to continue</option>
 
         </Form.Control>
-        
+        <div style={{ color: 'red', textAlign: 'start' }}>{
+          formik.touched.model &&
+            formik.values.model === "" ? 'please select model name ' : ''}
+        </div>
       </>);
     }
     if (selected !== "other") {
@@ -120,9 +179,9 @@ export const AddCar = (props) => {
         <>
           <Form.Control as="select"
             style={{ marginTop: 20 }}
-            
+            onBlur={formik.handleBlur}
             onChange={(e) => {
-              setModel( e.target.value );
+              setModel({ setSelectedModel: e.target.value });
             }}
           >
             <option value="">select car model</option>
@@ -131,7 +190,10 @@ export const AddCar = (props) => {
             })}
             <option value="other">other</option>
           </Form.Control>
-          
+          <div style={{ color: 'red', textAlign: 'start' }}>{
+            formik.touched.model &&
+              formik.values.model === "" ? 'please select model name ' : ''}
+          </div>
         </>
       );
     }
@@ -158,22 +220,34 @@ export const AddCar = (props) => {
           style={{ marginTop: 20 }}
           type='text'
           name='brand'
+
           placeholder='Enter brand name'
-          onChange={(e) => {
-                      e.preventDefault();
-                      setState(e.target.value);
-                    }}
+          onBlur={formik.handleBlur}
+          onChange={formik.handleChange}
         />
+
+        <div style={{ color: 'red', textAlign: 'start' }}>
+          {
+            formik.touched.model ?
+              formik.errors.model : ''
+          }
+        </div>
         <Form.Control
           style={{ marginTop: 20 }}
           type='text'
           name='model'
+          value={formik.values.model}
           placeholder='Enter model name'
-          onChange={(e) => {
-                      e.preventDefault();
-                      setModel(e.target.value);
-                    }}
+          onBlur={formik.handleBlur}
+          onChange={formik.handleChange}
         />
+
+        <div style={{ color: 'red', textAlign: 'start' }}>
+          {
+            formik.touched.model ?
+              formik.errors.model : ''
+          }
+        </div>
       </>);
     }
   }
@@ -192,12 +266,18 @@ export const AddCar = (props) => {
           style={{ marginTop: 20 }}
           type='text'
           name='model'
+
           placeholder='Enter model name'
-          onChange={(e) => {
-                      e.preventDefault();
-                      setModel(e.target.value);
-                    }}
+          onBlur={formik.handleBlur}
+          onChange={formik.handleChange}
         />
+
+        <div style={{ color: 'red', textAlign: 'start' }}>
+          {
+            formik.touched.model ?
+              formik.errors.model : ''
+          }
+        </div>
       </>);
     }
   }
