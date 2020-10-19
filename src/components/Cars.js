@@ -33,14 +33,12 @@ export const Cars = () => {
   const [onError, setOnError] = React.useState(undefined);
   const [cars, setCars] = React.useState('');
   const [user, setUser] = React.useState('');
-  const [newCars, setNewCars] = React.useState('');
   const [loading, setLoading] = React.useState(false);
   const [showModal, setShowModal] = React.useState(false);
   const [showAddCar, setAddCar] = useState(false);
   const [modalContent, setModalContent] = React.useState('');
   const [id,setId] =React.useState('');
   const [carTabPage, setCarTabPage] = React.useState(0);
-  const [newCarTabPage, setNewCarTabPage] = React.useState(0);
 
   const handleCarAddShow = () => setAddCar(true);
   const handleAddCarClose = () => setAddCar(false);
@@ -54,14 +52,10 @@ export const Cars = () => {
       if(userRes.enable===false){
         history.push('/verifymail')
       }
-      if(userRes.type==='customer'){
+      
       let carsRes = await get(`/cars/byUser/my?page=${carTabPage}`);
       setCars(carsRes);
-      }
-      else{
-        let newCarsRes = await get(`/cars/allcars?page=${newCarTabPage}`);
-        setCars(newCarsRes);
-      }
+      
     }
     catch (e) {
       console.error(e);
@@ -73,7 +67,7 @@ export const Cars = () => {
   }
 
   const stableAttemptFetching = React.useCallback(attemptFetching,
-    [carTabPage, newCarTabPage]);
+    [carTabPage]);
 
   React.useEffect(() => {
     stableAttemptFetching();
@@ -139,40 +133,8 @@ export const Cars = () => {
                     id={id}
                   />
                   {
-                    user.type !== 'customer' ?
-                      <Tabs
-                        defaultActiveKey='my'
-                        id='tabs'>
-                        
-                        <Tab
-                          eventKey='my'
-                          title='users cars'>
-                          {
-                            typeof cars === 'object' &&
-                              cars.content?.length > 0 ?
-                              cars.content.map((car, index) =>
-                                <ListGroup.Item
-                                  key={index}
-                                  action
-                                >
-                                  <CarDetailsLayout car={car} user={user} trigger={() => triggerShowModal(car,car.ownerId)}
-                                    show={handleShow} />
-                                  {RemoveUserCar(car.id)}
-                                  
-                                </ListGroup.Item>
-                              ) : <p>
-                                No Cars found, contact Administrator<br />
-                      if you think this is a mistake
-                    </p>
-                          }
-                          <Paginate
-                            content={cars}
-                            pageNo={carTabPage}
-                            setPage={setCarTabPage}
-                            callback={stableAttemptFetching} />
-                        </Tab>
-                        
-                      </Tabs> :
+                    user.type !== 'customer' && user.type !=='admin'?
+                      <>nothing to show here</> :
                       <ListGroup style={{ marginTop: 20 }}>
                         {
                           typeof cars === 'object' &&
@@ -182,7 +144,7 @@ export const Cars = () => {
                                 key={index}
                                 action
                               >
-                                <CarDetailsLayout car={car} user={user} trigger={() => triggerShowModal(car,'me')}
+                                <CarDetailsLayout car={car} user={user} trigger={() => triggerShowModal(car,car.ownerId)}
                                   show={handleShow} />
                                 {RemoveUserCar(car.id)}
                                 
