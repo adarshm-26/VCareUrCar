@@ -90,8 +90,10 @@ export const BookingModal = (props) => {
   React.useEffect(() => {
     if (props.show)
       fetchAll();
-    if (props.user.type !== 'admin')
+    if (props.user.type !== 'admin') {
       setUser([props.user.email]);
+      setSelectedUser(props.user.id);
+    }
     else {
       get('/user/all')
       .then(res => {
