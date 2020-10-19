@@ -67,8 +67,8 @@ export const CheckMailVerification = () => {
             border: '1px solid #000000'
           }}>
             <Card.Body>
-                <Card.Title>verify mail</Card.Title>
-                <Card.Subtitle>enter your verification code</Card.Subtitle>
+                <Card.Title>Verify Email</Card.Title>
+                <Card.Subtitle>Enter your verification code</Card.Subtitle>
                 <Form onSubmit={async (e) => {
                     e.preventDefault();
                     console.log('verifying....');
@@ -94,9 +94,9 @@ export const CheckMailVerification = () => {
                         } />
 
                     <Button
-                        style={{ marginTop: '20px', marginBottom: '10px' }}
+                        style={{ marginTop: '20px' }}
                         type='submit'
-                        label='verify mail'
+                        label='Verify'
                     />
                 </Form>
             </Card.Body>

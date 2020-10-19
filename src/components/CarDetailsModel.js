@@ -60,8 +60,7 @@ export const CarDetailsModel = (props) => {
                                     <tbody>
                                         {
 
-                                            [{ name: 'User Name', value: user.name },
-                                            { name: 'Email id', value: user.email },
+                                            [{ name: 'Owner', value: user.name },
                                             { name: 'Car id', value: props.content.id },
                                             { name: 'Car Brand', value: props.content.brand },
                                             { name: 'Car Model', value: props.content.model }].map((key, index) =>
