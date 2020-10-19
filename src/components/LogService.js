@@ -1,5 +1,5 @@
 import React from 'react';
-import { Header, Alert, Button, refreshIcon, ConfirmModal } from './Components';
+import { Header, Alert, Button, Footer, refreshIcon, ConfirmModal } from './Components';
 import { Spinner, Card, Container, Row, Table, Form, ListGroup, Col } from 'react-bootstrap';
 import { get, post } from '../Utils';
 import { useHistory } from 'react-router-dom';
@@ -7,6 +7,7 @@ import { useHistory } from 'react-router-dom';
 export const LogService = (props) => {
   const [loading, setLoading] = React.useState(false);
   const [car, setCar] = React.useState(undefined);
+  const [technician, setTechnician] = React.useState(undefined);
   const [servicedServices, setServicedServices] = React.useState([]);
   const [onError, setOnError] = React.useState('');
   const [showConfirmModal, setShowConfirmModal] = React.useState(false);
@@ -21,6 +22,8 @@ export const LogService = (props) => {
     try {
       let carRes = await get(`/cars/${props.location?.state?.job.carId}`);
       setCar(carRes);
+      let techRes = await get(`/user/${props.location?.state?.job.technicianId}`);
+      setTechnician(techRes.name);
     } catch (e) {
       console.error(e);
       setOnError(e.message);
@@ -45,11 +48,9 @@ export const LogService = (props) => {
     <Header/>
     <div style={{ 
       display: 'flex', 
-      height: '100%', 
       justifyContent: 'center', 
       alignItems: 'center',
       background: 'white',
-      overflow: 'auto'
     }}>
       {
         loading ?
@@ -62,9 +63,8 @@ export const LogService = (props) => {
         props.location?.state?.job ?
         car ?
         <Container style={{
-          width: '100%',
-          height: '100%',
-          padding: '120px'
+          margin: '8rem auto',
+          maxWidth: '60rem'
         }}>
           <Card.Body >
             <div>
@@ -75,33 +75,36 @@ export const LogService = (props) => {
                   textDecoration: 'underline'
                 }}>Service Job</h1>
               </Row>
-              <Table borderless style={{ textAlign: 'end' }}>
+              <Table borderless style={{ fontFamily: 'Source' }}>
                 <tbody>
                   {['id', 'status'].map((key, index) =>
                   <tr key={index}>
-                    <th>{key.toUpperCase()}</th>
-                    <td>{props.location.state.job[key]}</td>   
+                    <th style={{ textAlign: 'end' }}>{key.toUpperCase()}</th>
+                    <td style={{ textAlign: 'start' }}>{props.location.state.job[key]}</td>   
                   </tr>)}
                   <tr>
-                    <th>Booking Date</th>
-                    <td>{new Date(props.location.state.job.bookingDate).toLocaleDateString()}</td>
+                    <th style={{ textAlign: 'end' }}>Booking Date</th>
+                    <td style={{ textAlign: 'start' }}>{new Date(props.location.state.job.bookingDate).toLocaleDateString()}</td>
                   </tr>
                   <tr>
-                    <th>Car</th>
-                    <td>{car.model}({car.brand})</td>
+                    <th style={{ textAlign: 'end' }}>Car</th>
+                    <td style={{ textAlign: 'start' }}>{car.model}({car.brand})</td>
                   </tr>
                   <tr>
-                    <th>Deadline Date</th>
-                    <td>{new Date(props.location.state.job.deadlineDate).toLocaleDateString()}</td>
+                    <th style={{ textAlign: 'end' }}>Deadline Date</th>
+                    <td style={{ textAlign: 'start' }}>{new Date(props.location.state.job.deadlineDate).toLocaleDateString()}</td>
                   </tr>
                   <tr>
-                    <th>Technician</th>
-                    <td>{props.location.state.job.technicianId}</td>
+                    <th style={{ textAlign: 'end' }}>Technician</th>
+                    <td style={{ textAlign: 'start' }}>{technician}</td>
                   </tr>
                 </tbody>
               </Table>
-              <h4>Services : </h4>
-              <ListGroup style={{ textAlign: 'start' }}>
+              <h4 style={{
+                textAlign: 'start',
+                textDecoration: 'underline'
+              }}>Services : </h4>
+              <ListGroup style={{ textAlign: 'start', fontFamily: 'Source' }}>
               {
                 servicedServices.map((service, index) => 
                 <ListGroup.Item key={index}>
@@ -202,6 +205,7 @@ export const LogService = (props) => {
     }
     </div>
     <Alert onError={onError} setOnError={setOnError}/>
+    <Footer/>
   </>
   );
 }

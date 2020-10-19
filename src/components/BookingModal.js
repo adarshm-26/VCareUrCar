@@ -1,14 +1,16 @@
 import React from 'react';
 import { Modal, Form, Spinner, Row, Col } from 'react-bootstrap';
 import { Button, Alert } from './Components';
-import { Services } from './ServicesList'; 
+import { Services, CombinedCosts } from './ServicesList'; 
 import { post, get } from '../Utils';
 import { useHistory } from 'react-router-dom';
 
 export const BookingModal = (props) => {
   const [cars, setCars] = React.useState('');
-  const [user, setUser] = React.useState('');
+  const [user, setUser] = React.useState([]);
   const [selectedCar, setSelectedCar] = React.useState('');
+  const [selectedUser, setSelectedUser] = React.useState('');
+  const [selectedGroup, setSelectedGroup] = React.useState('Individual');
   const [loading, setLoading] = React.useState(false);
   const [services, setServices] = React.useState('');
   const history = useHistory();
@@ -45,13 +47,36 @@ export const BookingModal = (props) => {
     event.preventDefault();
     try {
       let selectedServices = [];
-      Services.forEach((service, index) => {
-        if (services[index])
-          selectedServices.push(service);
-      });
+      if (selectedGroup === 'Individual') {
+        Services.forEach((service, index) => {
+          if (services[index])
+            selectedServices.push(service);
+        });
+      } else {
+        switch (selectedGroup) {
+          case 'Regular' :
+            CombinedCosts[0].ids.forEach((serviceId, index) => 
+              selectedServices.push(Services[serviceId])
+            );
+            break;
+          case 'Extensive' :
+            CombinedCosts[1].ids.forEach((serviceId, index) => 
+              selectedServices.push(Services[serviceId])
+            );
+            break;
+          case 'Complete' :
+            CombinedCosts[2].ids.forEach((serviceId, index) => 
+              selectedServices.push(Services[serviceId])
+            );
+            break;
+          default:
+            console.error('Selected invalid group');
+            break;
+        }
+      }
       await post('/jobs/book', {
         carId: selectedCar,
-        customerId: user,
+        customerId: selectedUser,
         status: 'BOOKED',
         bookingDate: new Date().getTime(),
         services: selectedServices
@@ -66,7 +91,15 @@ export const BookingModal = (props) => {
     if (props.show)
       fetchAll();
     if (props.user.type !== 'admin')
-      setUser(props.user.id);
+      setUser([props.user.email]);
+    else {
+      get('/user/all')
+      .then(res => {
+        setUser(res.content);
+        setSelectedUser(res.content[0].id);
+      })
+      .catch(e => console.error(e));
+    }
   }, [props.show, props.user]);
 
   return (
@@ -89,7 +122,7 @@ export const BookingModal = (props) => {
         <span className="sr-only">Loading...</span>
       </Spinner> :
       <>
-        <Modal.Body>
+        <Modal.Body style={{ fontFamily: 'Source' }}>
           <Form>
             {
               props.user?.type !== 'admin' ?
@@ -104,12 +137,17 @@ export const BookingModal = (props) => {
                 <Col sm='7'>
                   <Form.Control
                     name='user'
-                    value={user}
+                    value={selectedUser}
+                    as='select'
                     placeholder='Exact ID of customer'
                     onChange={(e) => {
                       e.preventDefault();
-                      setUser(e.target.value);
-                    }}/>
+                      setSelectedUser(e.target.value);
+                    }}>
+                    {
+                      user.map((usr, index) => <option value={usr.id}>{usr.email}</option>)
+                    }
+                  </Form.Control>
                 </Col>
               </Form.Group>
             }
@@ -141,11 +179,41 @@ export const BookingModal = (props) => {
             </Form.Group>
             <Form.Group 
               as={Row} 
+              controlId='selectGroup' 
+              key='group'
+              style={{ alignItems: 'center' }}>
+              <Form.Label column sm='3'>
+                Select service group : <br/>
+              </Form.Label>
+              <Col 
+                sm='7' 
+                style={{ 
+                  maxHeight: '10rem', 
+                }}>
+                {
+                  [{name: 'Individual'}, ...CombinedCosts].map((group, index) => {
+                    return <Form.Check
+                      type='radio'
+                      name='group'
+                      key={index}
+                      inline
+                      label={group.name}
+                      checked={group.name === selectedGroup}
+                      onChange={(e) => {
+                        setSelectedGroup(group.name);
+                      }}
+                    />;
+                  })
+                }
+              </Col>
+            </Form.Group>
+            <Form.Group 
+              as={Row} 
               controlId='selectServices' 
               key='service'
               style={{ alignItems: 'center' }}>
               <Form.Label column sm='3'>
-                Select services : <br/>
+                Select services individually : <br/>
                 (scroll to see more)
               </Form.Label>
               <Col 
@@ -162,6 +230,7 @@ export const BookingModal = (props) => {
                       type='checkbox'
                       name={index}
                       key={index}
+                      disabled={selectedGroup !== 'Individual'}
                       label={Services[index].name}
                       onChange={handleServiceSelect}
                     />;

@@ -13,7 +13,8 @@ import {
   Alert, 
   Button, 
   BookingModal, 
-  JobDetailsModal, 
+  JobDetailsModal,
+  Footer, 
   refreshIcon } from './Components';
 import { get } from '../Utils';
 import { Paginate } from './Paginate';
@@ -126,7 +127,8 @@ export const Jobs = () => {
                 user={user}/>
               {
                 user.type === 'supervisor' ?
-                <Tabs 
+                <Tabs
+                  style={{ fontFamily: 'Source' }}
                   defaultActiveKey='my' 
                   id='tabs'>
                   <Tab 
@@ -175,7 +177,7 @@ export const Jobs = () => {
                     callback={stableAttemptFetching}/>
                   </Tab>
                 </Tabs> :
-                <ListGroup style={{ marginTop: 20 }}>
+                <ListGroup style={{ marginTop: 20, fontFamily: 'Source' }}>
                   {
                     typeof jobs === 'object' && 
                     jobs.content?.length > 0 ? 
@@ -210,6 +212,7 @@ export const Jobs = () => {
       }
       </div>
       <Alert onError={onError} setOnError={setOnError}/>
+      <Footer/>
   </>);
 }
 
@@ -217,7 +220,7 @@ const JobDetailsLayout = (props) => {
   return <Row key={props.id}>
     <div style={{ flex: 1 }}>
       <Badge
-      style={{ fontSize: 16, fontFamily: 'monospace' }}
+      style={{ fontSize: 16 }}
       variant={statusToBadgeColorMap[props.status]}>
         {props.status}
       </Badge>

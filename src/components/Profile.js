@@ -1,6 +1,6 @@
 import React from 'react';
 import { Card, Spinner, Row, Col, Container, Modal, Form } from 'react-bootstrap';
-import { Header, Alert, Button, profileIcon, refreshIcon } from './Components';
+import { Header, Alert, Button, Footer, profileIcon, refreshIcon } from './Components';
 import { get, post } from '../Utils';
 import { useFormik } from 'formik';
 import { useHistory } from 'react-router-dom';
@@ -165,6 +165,7 @@ export const Profile = () => {
       }
       </div>
       <Alert onError={onError} setOnError={setOnError}/>
+      <Footer/>
   </>);
 }
 
@@ -255,10 +256,8 @@ const RegisterEmployeeModal = (props) => {
       console.log('Registering....');
       try {
         delete (values.cpassword);
-        let result = await post('/user/register', 
-          values, {
-            withAuth: false
-          });
+        let result = await post('/user/registerEmployee', 
+          values);
         console.log(result);
       } catch (e) {
         console.error(e);

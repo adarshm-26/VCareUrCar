@@ -1,6 +1,6 @@
 import React from 'react';
 import { Card, Row, Container, Form } from 'react-bootstrap';
-import { Header, Alert, Button } from './Components';
+import { Header, Alert, Button, Footer } from './Components';
 import { get } from '../Utils';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
@@ -29,7 +29,7 @@ export const Reports = () => {
         setOnError(e.message);
       }
     }
-  })
+  });
 
   return (<>
     <Header/>
@@ -55,12 +55,12 @@ export const Reports = () => {
               Reports
             </h1>
           </Row>
-          <Row style={{ fontSize: 30 }}>
+          <Row style={{ fontSize: 30, fontFamily: 'Source' }}>
             {
               ['Users','Jobs','Cars'].map((clazz, index) => 
                 <Form.Check
                   inline
-                  style={{ margin: 10 }}
+                  style={{ margin: 15 }}
                   name='clazz'
                   type='radio'
                   label={clazz}
@@ -83,5 +83,6 @@ export const Reports = () => {
       </Container>
     </div>
     <Alert onError={onError} setOnError={setOnError}/>
+    <Footer/>
   </>);
 }

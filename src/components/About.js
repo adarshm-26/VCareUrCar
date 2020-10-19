@@ -11,7 +11,7 @@ export const About = (props) => {
     <Container style={{
       justifyContent: 'center',
       alignItems: 'center',
-      paddingTop: '10rem',
+      margin: '10rem auto',
       textAlign: 'start',
     }}>
       <Row>

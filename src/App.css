@@ -1,6 +1,16 @@
 @font-face {
   font-family: 'Sansita';
-  src: local('Sansita'), url(./fonts/Sansita-Regular.ttf)
+  src: local('Sansita'), url(./fonts/Sansita-Regular.ttf);
+}
+
+@font-face {
+  font-family: 'Ubuntu';
+  src: local('Ubuntu'), url(./fonts/Ubuntu-Regular.ttf);
+}
+
+@font-face {
+  font-family: 'Source';
+  src: local('Source'), url(./fonts/SourceSansPro-Regular.ttf);
 }
 
 .App {
@@ -25,7 +35,7 @@ html, body, #root, #root>div {
 }
 
 .text-box-profile-values {
-  font-family: sans-serif;
+  font-family: 'Source';
   background-color: #EEEEEE;
   color: #000000;
   flex: 1;

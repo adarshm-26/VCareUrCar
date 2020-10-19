@@ -1,14 +1,16 @@
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import { Modal, Table } from 'react-bootstrap';
+import { Modal, Table, ButtonGroup } from 'react-bootstrap';
 import { Button } from './Components'; 
+import { get } from '../Utils';
 
 export const JobDetailsModal = (props) => {
   const history = useHistory();
-  const [action, setAction] = React.useState({
-    label: '',
-    onClick: () => {}
-  });
+  const [technician, setTechnician] = React.useState('');
+  const [supervisor, setSupervisor] = React.useState('');
+  const [customer, setCustomer] = React.useState('');
+  const [car, setCar] = React.useState('');
+  const [action, setAction] = React.useState([]);
 
   const schedule = () => {
     history.push({
@@ -60,55 +62,69 @@ export const JobDetailsModal = (props) => {
     [props.content, props.user]);
 
   React.useEffect(() => {
-    const actionBuilder = async () => {
+    let prevActs = [...action];
+    let newActs = [];
+    let user = props.user, content = props.content;
+    if (content.status === 'BOOKED' &&
+    (user.type === 'admin' || 
+    user.type === 'supervisor')) {
+      newActs.push({
+        label: 'Schedule',
+        onClick: stableSchedule
+      });
+    }
+    if ((content.status === 'SCHEDULED' || 
+    content.status === 'UNDER_SERVICE') &&
+    (user.type === 'admin' || 
+    user.type === 'technician')) {
+      newActs.push({
+        label: 'Log Services',
+        onClick: stableLogService
+      })
+    }
+    if (content.status === 'UNDER_SERVICE' &&
+    (user.type === 'admin' || 
+    user.type === 'supervisor')) {
+      newActs.push({
+        label: 'Verify Services',
+        onClick: stableVerify
+      });
+    }
+    if (content.status === 'VERIFIED' &&
+    (user.type === 'admin' ||
+    user.type === 'customer')) {
+      newActs.push({
+        label: 'Make payment',
+        onClick: stablePay
+      });
+    }
+    if (prevActs.length !== newActs.length) {
+      setAction(newActs);
+    }
+
+    const attemptFetching = async () => {
       try {
-        console.log(props.content.status, props.user.type);
-        if (props.content.status === 'BOOKED' &&
-        (props.user.type === 'admin' || 
-        props.user.type === 'supervisor')) {
-          setAction({
-            label: 'Schedule',
-            onClick: stableSchedule
-          });
+        let carRes = await get(`/cars/${content.carId}`);
+        setCar(`${carRes.model}(${carRes.brand})`);
+        if (content.supervisorId) {
+          let supRes = await get(`/user/${content.supervisorId}`);
+          setSupervisor(supRes.name);
         }
-        else if ((props.content.status === 'SCHEDULED' || 
-        props.content.status === 'UNDER_SERVICE') &&
-        (props.user.type === 'admin' || 
-        props.user.type === 'technician')) {
-          setAction({
-            label: 'Log Services',
-            onClick: stableLogService
-          });
+        if (content.technicianId) {
+          let techRes = await get(`/user/${content.technicianId}`);
+          setTechnician(techRes.name);
         }
-        else if (props.content.status === 'UNDER_SERVICE' &&
-        (props.user.type === 'admin' || 
-        props.user.type === 'supervisor')) {
-          setAction({
-            label: 'Verify Services',
-            onClick: stableVerify
-          })
-        }
-        else if (props.content.status === 'VERIFIED' &&
-        (props.user.type === 'admin' ||
-        props.user.type === 'customer')) {
-          setAction({
-            label: 'Make payment',
-            onClick: stablePay
-          })
-        }
-        else {
-          setAction({
-            label: '',
-            onClick: () => {}
-          })
+        if (content.customerId) {
+          let custRes = await get(`/user/${content.customerId}`);
+          setCustomer(custRes.name);
         }
       } catch (e) {
         console.error(e);
       }
     }
-    actionBuilder();
-  }, [props.user.type, 
-    props.content.status,
+    attemptFetching();
+  }, [props.content,
+    props.user, 
     stableSchedule,
     stableVerify,
     stableLogService,
@@ -125,24 +141,27 @@ export const JobDetailsModal = (props) => {
         style={{ fontFamily: 'Sansita' }}>
         Job Specifics
       </Modal.Title>
+      <ButtonGroup>
       {
-        action.label !== '' ?
-        <div style={{ marginLeft: 'auto', marginRight: 0 }}>
+        action.length > 0 ?
+        action.map((button, index) => 
+        <div style={{ margin: 10 }}>
           <Button 
-            onClick={action.onClick} 
-            label={action.label}/>
-        </div> : 
-        <></>
+            onClick={button.onClick} 
+            label={button.label}/>
+        </div>)
+         : <></>
       }
+      </ButtonGroup>
     </Modal.Header>
-    <Modal.Body style={{ maxHeight: '25rem', overflow: 'auto' }}>
+    <Modal.Body style={{ maxHeight: '25rem', overflow: 'auto', fontFamily: 'Source' }}>
       <Table hover borderless>
         <tbody>
         {
           typeof props.content === 'object' ?
           [{ name: 'Job ID', value: props.content.id },
-          { name: 'Car', value: props.content.carId },
-          { name: 'Customer', value: props.content.customerId },
+          { name: 'Car', value: car },
+          { name: 'Customer', value: customer },
           { name: 'STATUS', value: props.content.status },
           { name: 'Booked On', value: props.content.bookingDate ? 
             new Date(props.content.bookingDate).toLocaleDateString() : undefined },
@@ -152,8 +171,8 @@ export const JobDetailsModal = (props) => {
           new Date(props.content.appointedDate).toLocaleDateString() : undefined },
           { name: 'Deadline', value: props.content.deadlineDate ? 
           new Date(props.content.deadlineDate).toLocaleDateString() : undefined },
-          { name: 'Supervisor', value: props.content.supervisorId },
-          { name: 'Technician', value: props.content.technicianId }].map((key, index) => 
+          { name: 'Supervisor', value: supervisor },
+          { name: 'Technician', value: technician }].map((key, index) => 
             key.value ?
             <tr key={index}>
               <th>{key.name}</th>
