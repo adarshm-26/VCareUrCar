@@ -23,7 +23,7 @@ export const Services = [
   { name: 'Complete check for rusting parts' }
 ];
 
-const CombinedCosts = [
+export const CombinedCosts = [
   { ids: [0,1,3,4,5,6,7], name: 'Regular', cost: '3500', id: 1 },
   { ids: [2,8,9,10,11,12,13,17], name: 'Extensive', cost: '14500', id: 2 },
   { ids: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17], name: 'Complete', cost: '16500', id: 3 }
@@ -33,7 +33,7 @@ export const ServicePage = (props) => {
   return (<>
     <Header/>
     <Container style={{
-      marginTop: '10rem',
+      margin: '10rem auto',
       background: '#ffffff',
       border: '#000000 solid 1px',
       padding: '1rem'
@@ -45,7 +45,7 @@ export const ServicePage = (props) => {
       }}>
         <h4>Categories</h4>
       </div>
-      <Accordion defaultActiveKey={CombinedCosts[0].id}>
+      <Accordion defaultActiveKey={CombinedCosts[0].id} style={{ fontFamily: 'Source' }}>
         {
           CombinedCosts.map((combination, index) => 
           <Card key={index}>
@@ -77,7 +77,8 @@ export const ServicePage = (props) => {
         <h4>All services</h4>
       </div>
       <ListGroup style={{
-        textAlign: 'start'
+        textAlign: 'start',
+        fontFamily: 'Source'
       }}>
       {
         Services.map((service, index) => 

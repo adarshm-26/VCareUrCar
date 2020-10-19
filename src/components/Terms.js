@@ -6,7 +6,7 @@ export const Terms = (props) => {
   return (<>
     <Header/>
     <div style={{
-      paddingTop: '10rem',
+      margin: '10rem auto',
     }}>
     <Container style={{
       background: 'white',
@@ -26,7 +26,7 @@ export const Terms = (props) => {
           <h1>Terms & Conditions governing your use of this website</h1>
         </Col>
       </Row>
-      <Row>
+      <Row style={{ fontFamily: 'Source' }}>
         <ol>
           <li><strong>Introduction</strong><br/>
             These Website Standard Terms And Conditions (these “Terms” or these “Website Standard Terms And Conditions”) contained herein on this webpage, shall govern your use of this website, including all pages within this website (collectively referred to herein below as this “Website”). These Terms apply in full force and effect to your use of this Website and by using this Website, you expressly accept all terms and conditions contained herein in full. You must not use this Website, if you have any objection to any of these Website Standard Terms And Conditions.<br/>

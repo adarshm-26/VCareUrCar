@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Card, Form } from 'react-bootstrap';
-import { Header, Alert, Button } from './Components';
+import { Header, Alert, Button, Footer } from './Components';
 import { useFormik } from 'formik';
 import { useHistory } from 'react-router-dom';
 import * as Yup from 'yup';
@@ -60,7 +60,8 @@ export const Register = () => {
     }
   });
 
-  return (<div style={{ 
+  return (<>
+  <div style={{ 
     display: 'flex',
     height: '100%',
     justifyContent: 'center', 
@@ -110,5 +111,7 @@ export const Register = () => {
       </Card.Body>
     </Card>
     <Alert onError={onError} setOnError={setOnError}/>
-  </div>);  
+  </div>
+  <Footer/>
+  </>);  
 }

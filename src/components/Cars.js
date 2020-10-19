@@ -6,9 +6,7 @@ import {
   ListGroup,
   Badge,
   Row,
-  Tabs,
   Modal,
-  Tab
 } from 'react-bootstrap';
 import {
   Header,
@@ -16,14 +14,12 @@ import {
   Button,
   CarDetailsModel,
   AddCar,
+  Footer,
   refreshIcon
 } from './Components';
 import { get, post } from '../Utils';
 import { Paginate } from './Paginate';
 import { useHistory } from 'react-router-dom';
-
-
-
 
 export const Cars = () => {
   const [show, setShow] = useState(false);
@@ -33,35 +29,25 @@ export const Cars = () => {
   const [onError, setOnError] = React.useState(undefined);
   const [cars, setCars] = React.useState('');
   const [user, setUser] = React.useState('');
-  const [newCars, setNewCars] = React.useState('');
   const [loading, setLoading] = React.useState(false);
   const [showModal, setShowModal] = React.useState(false);
   const [showAddCar, setAddCar] = useState(false);
   const [modalContent, setModalContent] = React.useState('');
   const [id,setId] =React.useState('');
   const [carTabPage, setCarTabPage] = React.useState(0);
-  const [newCarTabPage, setNewCarTabPage] = React.useState(0);
 
-  const handleCarAddShow = () => setAddCar(true);
   const handleAddCarClose = () => setAddCar(false);
 
   const attemptFetching = async () => {
     setLoading(true);
     try {
-
       let userRes = await get('/user/me');
       setUser(userRes);
       if(userRes.enable===false){
         history.push('/verifymail')
       }
-      if(userRes.type==='customer'){
       let carsRes = await get(`/cars/byUser/my?page=${carTabPage}`);
       setCars(carsRes);
-      }
-      else{
-        let newCarsRes = await get(`/cars/allcars?page=${newCarTabPage}`);
-        setCars(newCarsRes);
-      }
     }
     catch (e) {
       console.error(e);
@@ -73,7 +59,7 @@ export const Cars = () => {
   }
 
   const stableAttemptFetching = React.useCallback(attemptFetching,
-    [carTabPage, newCarTabPage]);
+    [carTabPage]);
 
   React.useEffect(() => {
     stableAttemptFetching();
@@ -84,8 +70,6 @@ export const Cars = () => {
     setModalContent(car);
     setShowModal(true);
   }
-
-
 
   const hideModal = () => setShowModal(false);
   return (<>
@@ -131,7 +115,6 @@ export const Cars = () => {
                         </div> : <></>
                     }
                   </Row>
-
                   <CarDetailsModel
                     handleClose={hideModal}
                     show={showModal}
@@ -139,65 +122,32 @@ export const Cars = () => {
                     id={id}
                   />
                   {
-                    user.type !== 'customer' ?
-                      <Tabs
-                        defaultActiveKey='my'
-                        id='tabs'>
-                        
-                        <Tab
-                          eventKey='my'
-                          title='users cars'>
-                          {
-                            typeof cars === 'object' &&
-                              cars.content?.length > 0 ?
-                              cars.content.map((car, index) =>
-                                <ListGroup.Item
-                                  key={index}
-                                  action
-                                >
-                                  <CarDetailsLayout car={car} user={user} trigger={() => triggerShowModal(car,car.ownerId)}
-                                    show={handleShow} />
-                                  {RemoveUserCar(car.id)}
-                                  
-                                </ListGroup.Item>
-                              ) : <p>
-                                No Cars found, contact Administrator<br />
-                      if you think this is a mistake
-                    </p>
-                          }
-                          <Paginate
-                            content={cars}
-                            pageNo={carTabPage}
-                            setPage={setCarTabPage}
-                            callback={stableAttemptFetching} />
-                        </Tab>
-                        
-                      </Tabs> :
-                      <ListGroup style={{ marginTop: 20 }}>
-                        {
-                          typeof cars === 'object' &&
-                            cars.content?.length > 0 ?
-                            cars.content.map((car, index) =>
-                              <ListGroup.Item
-                                key={index}
-                                action
-                              >
-                                <CarDetailsLayout car={car} user={user} trigger={() => triggerShowModal(car,'me')}
-                                  show={handleShow} />
-                                {RemoveUserCar(car.id)}
-                                
-                              </ListGroup.Item>
-                            ) : <p>
-                              No Cars Found<br />
-                      pls register your car details to show
-                    </p>
-                        }
-                        <Paginate
-                          content={cars}
-                          pageNo={carTabPage}
-                          setPage={setCarTabPage}
-                          callback={stableAttemptFetching} />
-                      </ListGroup>
+                    user.type !== 'customer' && user.type !=='admin'?
+                    <>nothing to show here</> :
+                    <ListGroup style={{ marginTop: 20, fontFamily: 'Source' }}>
+                      {
+                        typeof cars === 'object' &&
+                          cars.content?.length > 0 ?
+                          cars.content.map((car, index) =>
+                            <ListGroup.Item
+                              key={index}
+                              action>
+                              <CarDetailsLayout car={car} user={user} trigger={() => triggerShowModal(car,car.ownerId)}
+                                show={handleShow} />
+                              {RemoveUserCar(car.id)}
+                            </ListGroup.Item>
+                          ) : 
+                          <p>
+                            No Cars Found<br />
+                            pls register your car details to show
+                          </p>
+                      }
+                      <Paginate
+                        content={cars}
+                        pageNo={carTabPage}
+                        setPage={setCarTabPage}
+                        callback={stableAttemptFetching} />
+                    </ListGroup>
                   }
                 </div>
               </Card.Body>
@@ -211,7 +161,9 @@ export const Cars = () => {
       }
     </div>
     <Alert onError={onError} setOnError={setOnError} />
+    <Footer/>
   </>);
+  
   function remove(carid) {
     return async (e) => {
       e.preventDefault();
@@ -228,38 +180,38 @@ export const Cars = () => {
       }
     }
   }
+
   function RemoveUserCar(id) {
-    return (
-      <>
-        <Modal show={show} onHide={handleClose} animation={false} size="sm"
-          aria-labelledby="contained-modal-title-vcenter"
-          centered >
-          <Modal.Header closeButton>
-            <Modal.Title id="contained-modal-title-vcenter">Are You Sure .. ?</Modal.Title>
-          </Modal.Header>
-          <Modal.Body>Are you sure wnat to delete!</Modal.Body>
-          <Modal.Footer>
-            <Button variant="danger" onClick={remove(id)} label='Yes'>
-              Yes
-              </Button>
-            <Button variant="primary" onClick={handleClose} label='No'>
-              No
-              </Button>
-          </Modal.Footer>
-        </Modal>
-      </>
-    );
+    return (<>
+      <Modal show={show} onHide={handleClose} animation={false} size="sm"
+        aria-labelledby="contained-modal-title-vcenter"
+        centered >
+        <Modal.Header closeButton>
+          <Modal.Title id="contained-modal-title-vcenter">Are You Sure .. ?</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>Are you sure wnat to delete!</Modal.Body>
+        <Modal.Footer>
+          <Button variant="danger" onClick={remove(id)} label='Yes'>
+            Yes
+            </Button>
+          <Button variant="primary" onClick={handleClose} label='No'>
+            No
+            </Button>
+        </Modal.Footer>
+      </Modal>
+    </>);
   }
+
   function CarModal() {
     return (<>
-      <Modal show={showAddCar} onHide={handleAddCarClose} animation={false}
-        align="center">
+      <Modal show={showAddCar} onHide={handleAddCarClose} centered>
         <Modal.Header closeButton >
-          <Modal.Title id="contained-modal-title-vcenter" >
+          <Modal.Title id="contained-modal-title-vcenter" 
+            style={{ fontFamily: 'Sansita'}}>
             Add car details
           </Modal.Title>
         </Modal.Header>
-        <Modal.Body align="center">
+        <Modal.Body style={{ fontFamily: 'Source' }}>
           <AddCar user={user} />
         </Modal.Body>
       </Modal>
@@ -269,32 +221,31 @@ export const Cars = () => {
 
 const CarDetailsLayout = (props) => {
   return <Row key={props.id} >
-    <div style={{ flex: 2 }} onClick={props.trigger}>
+    <div style={{ flex: 1 }} onClick={props.trigger}>
       <Badge
-        style={{ fontSize: 16, fontFamily: 'monospace' }}
+        style={{ fontSize: 16 }}
         variant='info'>
-        show
+        Show
       </Badge>
     </div>
-    <div style={{ flex: 2 }}>
-      Car Brand {props.car.brand}
+    <div style={{ flex: 1 }}>
+      {props.car.brand}
     </div>
-    <div style={{ flex: 2 }}>
-      Car Model {props.car.model}
+    <div style={{ flex: 1 }}>
+      {props.car.model}
     </div>
-    <div style={{ flex: 2 }} >
+    <div style={{ flex: 1 }} >
       {
         props.user.type !== 'supervisor' && props.user.type !== 'technician' ?
           <Badge
             onClick={props.show}
-            style={{ fontSize: 16, fontFamily: 'monospace' }}
-            variant='info'>
+            style={{ fontSize: 16 }}
+            variant='danger'>
             Delete
       </Badge> :
           <div style={{ flex: 2 }}>
           </div>
       }
     </div>
-
   </Row>
 }

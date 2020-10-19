@@ -1,5 +1,5 @@
 import React from 'react';
-import { Header, Alert, Button, refreshIcon } from './Components';
+import { Header, Alert, Button, Footer, refreshIcon } from './Components';
 import { Spinner, Card, Container, Row, Table, ListGroup } from 'react-bootstrap';
 import { get, post } from '../Utils';
 import { useHistory } from 'react-router-dom';
@@ -83,11 +83,9 @@ export const Pay = (props) => {
     <Header/>
     <div style={{ 
       display: 'flex', 
-      height: '100%', 
       justifyContent: 'center', 
       alignItems: 'center',
       background: 'white',
-      overflow: 'auto'
     }}>
       {
         loading ?
@@ -100,9 +98,8 @@ export const Pay = (props) => {
         props.location?.state?.job ?
         car ?
         <Container style={{
-          width: '100%',
-          height: '100%',
-          padding: '120px',
+          margin: '8rem auto',
+          maxWidth: '60rem'
         }}>
           <Card.Body>
             <div>
@@ -113,48 +110,47 @@ export const Pay = (props) => {
                   textDecoration: 'underline'
                 }}>Pay Job</h1>
               </Row>
-              <Table borderless>
+              <Table borderless style={{ fontFamily: 'Source' }}>
                 <tbody>
                   {['id', 'status'].map((key, index) =>
                   <tr>
-                    <th>{key.toUpperCase()}</th>
-                    <td>{props.location.state.job[key]}</td>   
+                    <th style={{ textAlign: 'end' }}>{key.toUpperCase()}</th>
+                    <td style={{ textAlign: 'start' }}>{props.location.state.job[key]}</td>   
                   </tr>)}
                   <tr>
-                    <th>Booking Date</th>
-                    <td>{new Date(props.location.state.job.bookingDate).toLocaleDateString()}</td>
+                    <th style={{ textAlign: 'end' }}>Booking Date</th>
+                    <td style={{ textAlign: 'start' }}>{new Date(props.location.state.job.bookingDate).toLocaleDateString()}</td>
                   </tr>
                   <tr>
-                    <th>Car</th>
-                    <td>{car.model}({car.brand})</td>
+                    <th style={{ textAlign: 'end' }}>Car</th>
+                    <td style={{ textAlign: 'start' }}>{car.model}({car.brand})</td>
                   </tr>
                   <tr>
-                    <th>Deadline Date</th>
-                    <td>{new Date(props.location.state.job.deadlineDate).toLocaleDateString()}</td>
+                    <th style={{ textAlign: 'end' }}>Deadline Date</th>
+                    <td style={{ textAlign: 'start' }}>{new Date(props.location.state.job.deadlineDate).toLocaleDateString()}</td>
                   </tr>
                   <tr>
-                    <th>Technician</th>
-                    <td>{props.location.state.job.technicianId}</td>
+                    <th style={{ textAlign: 'end' }}>Technician</th>
+                    <td style={{ textAlign: 'start' }}>{props.location.state.job.technicianId}</td>
                   </tr>
                 </tbody>
               </Table>
-              <h4>Services : </h4>
-              <ListGroup  style={{ textAlign: 'start' }}>
+              <h4 style={{
+                textAlign: 'start',
+                textDecoration: 'underline'
+              }}>Services : </h4>
+              <ListGroup  style={{ textAlign: 'start', fontFamily: 'Source' }}>
               {
                 props.location.state.job?.services?.map((service, index) => 
                 <ListGroup.Item key={index}>
-                  <Row>
-                    <p>{service.name}</p>
-                    <div>Worked On : {service.work}</div>
-                    <div>Cost : {service.cost}</div>
-                    <div>
-                      Completed On : 
-                      {new Date(service.completedDate).toLocaleDateString()}
-                    </div>
-                    <div>
-                      Verified On :
-                      {new Date(service.verifiedDate).toLocaleDateString()}
-                    </div>
+                  <Row style={{ padding: '0 10px'}}>
+                    <p><strong>{service.name}</strong><br/>
+                    <strong>Worked On : </strong>{service.work}<br/>
+                    <strong>Cost : </strong>{service.cost}<br/>
+                    <strong>Completed On : </strong>
+                    {new Date(service.completedDate).toLocaleDateString()}<br/>
+                    <strong>Verified On : </strong>
+                    {new Date(service.verifiedDate).toLocaleDateString()}</p>
                   </Row>
                 </ListGroup.Item>)
               }
@@ -204,6 +200,7 @@ export const Pay = (props) => {
     }
     </div>
     <Alert onError={onError} setOnError={setOnError}/>
+    <Footer/>
   </>
   );
 }

@@ -24,21 +24,22 @@ export const CarDetailsModel = (props) => {
         }
     }
 
+    const stableAttemptFetching = React.useCallback(attemptFetching, [props.id]);
+
+    React.useEffect(() => {
+        if (props.id){
+            setUser('');
+            stableAttemptFetching();
+        }
+    }, [props.id, stableAttemptFetching]);
 
     return (<>
-
         <Modal
             show={props.show}
             onHide={props.handleClose}
             size='lg'
             centered>
             {
-                React.useEffect(() => {
-                    if (props.id){
-                        setUser('');
-                        attemptFetching();
-                    }
-                }, [props.id]),
                 loading ?
                     <Spinner
                         animation="border"
@@ -54,7 +55,7 @@ export const CarDetailsModel = (props) => {
                                     Car Specifics
                             </Modal.Title>
                             </Modal.Header>
-                            <Modal.Body style={{ maxHeight: '25rem', overflow: 'auto' }}>
+                            <Modal.Body style={{ maxHeight: '25rem', overflow: 'auto', fontFamily: 'Source' }}>
                                 <Table hover borderless>
                                     <tbody>
                                         {
@@ -75,7 +76,7 @@ export const CarDetailsModel = (props) => {
                                 <Alert onError={onError} setOnError={setOnError} />
                             </Modal.Body>
                             <Modal.Footer>
-                                <Button onClick={props.handleClose} label='close' />
+                                <Button onClick={props.handleClose} label='Close' />
                             </Modal.Footer></> : <div
                                 onClick={attemptFetching}
                                 style={{ fontSize: 20, cursor: 'pointer' }}>

@@ -14,7 +14,7 @@ export const ConfirmModal = (props) => {
         Confirm this action
       </Modal.Title>
     </Modal.Header>
-    <Modal.Body>
+    <Modal.Body style={{ fontFamily: 'Source' }}>
       {
         Object.keys(props.content).length ?
         Object.keys(props.content).map((key, index) => {

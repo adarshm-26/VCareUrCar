@@ -1,18 +1,11 @@
 import React, { useState } from 'react';
 import { Form, Spinner } from 'react-bootstrap';
-import { Alert, Button } from './Components';
+import { Alert, Button, refreshIcon } from './Components';
 import { useHistory } from 'react-router-dom';
 import { useFormik } from 'formik';
 import * as car from '../cardata/CarsList';
 import * as Yup from "yup";
 import { get, post } from '../Utils.js';
-import { Component } from 'react';
-
-
-const refreshIcon = <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <path d="M7.5 14.5C3.63401 14.5 0.5 11.366 0.5 7.5C0.5 5.26904 1.54367 3.28183 3.1694 2M7.5 0.5C11.366 0.5 14.5 3.63401 14.5 7.5C14.5 9.73096 13.4563 11.7182 11.8306 13M11.5 10V13.5H15M0 1.5H3.5V5" stroke="black" />
-</svg>;
-
 
 const RegisterSchema = Yup.object().shape({
   model: Yup.string().required(),
@@ -33,7 +26,6 @@ export const AddCar = () => {
   const [users,setUsers] =useState('');
   const history = useHistory();
   const [user, setUser] = useState('');
-  const token = localStorage.getItem('token');
   const formik = useFormik({
     initialValues: {
       brand: '',
@@ -43,7 +35,6 @@ export const AddCar = () => {
     validationSchema: RegisterSchema,
     onSubmit: async (values) => {
       console.log('adding car');
-      console.log(token);
       console.log(values);
       if(users){
         formik.values.ownerId = setId;
@@ -52,7 +43,6 @@ export const AddCar = () => {
       }
       try {
         await post('/cars/add', {
-
           brand: formik.values.brand,
           model: formik.values.model,
           ownerId: formik.values.ownerId
@@ -64,8 +54,8 @@ export const AddCar = () => {
         setOnError(e.message);
       }
     }
-  }
-  );
+  });
+
   const attemptFetching = async () => {
     setLoading(true);
     try {
@@ -75,7 +65,6 @@ export const AddCar = () => {
         let usersRes = await get('/user/all');
         setUsers(usersRes['content'])
       }
-
     }
     catch (e) {
       console.error(e);
@@ -114,7 +103,7 @@ export const AddCar = () => {
             {
               user.type==='admin'  ?
               <Form.Control as="select" style={{ marginTop: 20 }} name='userId' onChange={(e)=>{setSelectedUser(e.target.value)}}>
-              <option value="">select user to add car</option>
+              <option value="">Select user to add car</option>
               {users.map((props) => {
                   return <option value={props.id}>{props.email}</option>;
                 })}
@@ -126,22 +115,29 @@ export const AddCar = () => {
                 onChange={(e) => {
                   setState({ setSelected: e.target.value });
                 }}>
-                <option value="">select car brand</option>
+                <option value="">Select car brand</option>
                 {car.groupedOptions.map((props) => {
                   return <option value={props.label}>{props.label}</option>;
                 })}
-                <option value="other">other</option>
+                <option value="other">Other</option>
               </Form.Control>
               <div style={{ color: 'red', textAlign: 'start' }}>
                 {
                   formik.touched.brand &&
-                    formik.values.brand === "" ? 'please select brand name ' : ''
+                    formik.values.brand === "" ? 'Please select brand name ' : ''
                 }
               </div>
               {renderSecondSelect(state.setSelected)}
               {renderIfOtherModel(model.setSelectedModel)}
-
-              <Button style={{ marginTop: '15px' }} type="submit" label='Submit' />
+              <div style={{
+                width: '100%',
+                textAlign: 'end'
+              }}>
+                <Button 
+                  style={{ marginTop: '15px' }} 
+                  type="submit" 
+                  label='Submit'/>
+              </div>
             </Form>
 
             : <div
@@ -164,12 +160,12 @@ export const AddCar = () => {
           style={{ marginTop: 20 }}
           name='model'
         >
-          <option value="">select brand to continue</option>
+          <option value="">Select brand to continue</option>
 
         </Form.Control>
         <div style={{ color: 'red', textAlign: 'start' }}>{
           formik.touched.model &&
-            formik.values.model === "" ? 'please select model name ' : ''}
+            formik.values.model === "" ? 'Please select model name ' : ''}
         </div>
       </>);
     }
@@ -184,15 +180,15 @@ export const AddCar = () => {
               setModel({ setSelectedModel: e.target.value });
             }}
           >
-            <option value="">select car model</option>
+            <option value="">Select car model</option>
             {car[selected].map((props) => {
               return <option value={props.label}>{props.label}</option>;
             })}
-            <option value="other">other</option>
+            <option value="other">Other</option>
           </Form.Control>
           <div style={{ color: 'red', textAlign: 'start' }}>{
             formik.touched.model &&
-              formik.values.model === "" ? 'please select model name ' : ''}
+              formik.values.model === "" ? 'Please select model name ' : ''}
           </div>
         </>
       );
