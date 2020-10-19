@@ -62,7 +62,6 @@ export const JobDetailsModal = (props) => {
     [props.content, props.user]);
 
   React.useEffect(() => {
-    let prevActs = [...action];
     let newActs = [];
     let user = props.user, content = props.content;
     if (content.status === 'BOOKED' &&
@@ -98,9 +97,7 @@ export const JobDetailsModal = (props) => {
         onClick: stablePay
       });
     }
-    if (prevActs.length !== newActs.length) {
-      setAction(newActs);
-    }
+    setAction(newActs);
 
     const attemptFetching = async () => {
       try {
@@ -122,8 +119,10 @@ export const JobDetailsModal = (props) => {
         console.error(e);
       }
     }
-    attemptFetching();
-  }, [props.content,
+    if (props.show)
+      attemptFetching();
+  }, [props.show,
+    props.content,
     props.user, 
     stableSchedule,
     stableVerify,

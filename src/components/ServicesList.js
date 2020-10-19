@@ -24,9 +24,9 @@ export const Services = [
 ];
 
 export const CombinedCosts = [
-  { ids: [0,1,3,4,5,6,7], name: 'Regular', cost: '3500', id: 1 },
-  { ids: [2,8,9,10,11,12,13,17], name: 'Extensive', cost: '14500', id: 2 },
-  { ids: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17], name: 'Complete', cost: '16500', id: 3 }
+  { ids: [0,1,3,4,5,6,7], name: 'Regular', cost: 'Estd. 3500 Rs.', id: 1 },
+  { ids: [2,8,9,10,11,12,13,17], name: 'Extensive', cost: 'Estd. 14500 Rs', id: 2 },
+  { ids: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17], name: 'Complete', cost: 'Estd. 16500 Rs', id: 3 }
 ]
 
 export const ServicePage = (props) => {
