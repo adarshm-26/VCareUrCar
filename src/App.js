@@ -20,7 +20,8 @@ import {
   Terms,
   About,
   Privacy,
-  ServicePage
+  ServicePage,
+  PageNotFound
 } from './components/Components';
 import { AuthContext } from './context/auth';
 
@@ -64,7 +65,8 @@ const App = () => {
             <PrivateRoute path='/logService' component={LogService}/>
             <PrivateRoute path='/pay' component={Pay}/>
             <PrivateRoute path='/reports' component={Reports}/>
-            <PrivateRoute path='/verifymail' component={CheckMailVerification} />
+            <PrivateRoute path='/verifymail' component={CheckMailVerification}/>
+            <Route component={PageNotFound}/>
           </Switch>
         </Router>
       </div>
